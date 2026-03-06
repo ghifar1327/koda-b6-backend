@@ -1,7 +1,12 @@
 package handlers
 
+import (
+	"backend/internal/dto"
+	"backend/internal/service"
+	"net/http"
 
-
+	"github.com/gin-gonic/gin"
+)
 
 type Response struct {
 	Success bool   `json:"success"`
@@ -9,8 +14,43 @@ type Response struct {
 	Results any    `json:"results"`
 }
 
+type UserHandler struct {
+	service *service.UserService
+}
 
+func NewUserhadler(s *service.UserService) *UserHandler {
+	return &UserHandler{
+		service: s,
+	}
+}
 
+// ==================================================================== register
+
+func (h *UserHandler) Register(ctx *gin.Context) {
+	var req dto.RegisterRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid request body",
+		})
+		return
+	}
+
+	err := h.service.Register(ctx, req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "User registered successfully",
+	})
+
+}
 
 // import (
 // 	utils "backend/internal"
@@ -31,7 +71,6 @@ type Response struct {
 
 // // var currentID int
 // var mu sync.Mutex
-
 
 // func textToPtr(t pgtype.Text) *string {
 // 	if t.Valid {
@@ -129,13 +168,12 @@ type Response struct {
 // 	})
 // }
 
-
 // // ======================================================================================================= GET USER BY ID
 // func GetUserByID(ctx *gin.Context) {
-	
+
 // 	defer mu.Unlock()
 // 	mu.Lock()
-	
+
 // 	id, err := uuid.Parse(ctx.Param("id"))
 // 	if err != nil {
 // 		ctx.JSON(400, Response{false, "Invalid ID", nil})
@@ -157,31 +195,31 @@ type Response struct {
 // 			return
 // 		}
 // 	}
-	
+
 // 	ctx.JSON(404, Response{false, "User not found", nil})
 // }
 
 // // ============================================================================================================= UPDATE USER
 // func UpdateUser(ctx *gin.Context) {
-	
+
 // 	defer mu.Unlock()
 // 	mu.Lock()
-	
+
 // 	id, err := uuid.Parse(ctx.Param("id"))
 // 	if err != nil {
 // 		ctx.JSON(400, Response{false, "Invalid ID", nil})
 // 		return
 // 	}
-	
+
 // 	var input models.UpdateInput
 // 	if err := ctx.ShouldBindJSON(&input); err != nil {
 // 		ctx.JSON(400, Response{false, "Invalid request body", nil})
 // 		return
 // 	}
-	
+
 // 	for i, user := range Users {
 // 		if user.Id == id {
-			
+
 // 			if input.Email != nil {
 // 				for _, u := range Users {
 // 					if u.Email == *input.Email && u.Id != id {
@@ -191,7 +229,7 @@ type Response struct {
 // 				}
 // 				Users[i].Email = *input.Email
 // 			}
-			
+
 // 			if input.Password != nil {
 // 				hash, err := utils.HashPassword(*input.Password)
 // 				if err != nil {
@@ -200,32 +238,32 @@ type Response struct {
 // 				}
 // 				Users[i].Password = hash
 // 			}
-			
+
 // 			if input.Picture != nil {
 // 				Users[i].Picture = pgtype.Text{
 // 					String: *input.Picture,
 // 					Valid:  true,
 // 				}
 // 			}
-			
+
 // 			if input.FullName != nil {
 // 				Users[i].FullName = *input.FullName
 // 			}
-			
+
 // 			if input.Address != nil {
 // 				Users[i].Address = *input.Address
 // 			}
-			
+
 // 			if input.Phone != nil {
 // 				Users[i].Phone = *input.Phone
 // 			}
-			
+
 // 			if input.RoleId != nil {
 // 				Users[i].RoleId = *input.RoleId
 // 			}
-			
+
 // 			Users[i].UpdatedAt = time.Now()
-			
+
 // 			ctx.JSON(200, Response{
 // 				true,
 // 				"User updated successfully",
@@ -242,13 +280,13 @@ type Response struct {
 // 			return
 // 		}
 // 	}
-	
+
 // 	ctx.JSON(404, Response{false, "User not found", nil})
 // }
 
 // // ======================================================================================================= DELETE USER
 // func DeleteUser(ctx *gin.Context) {
-	
+
 // 	defer mu.Unlock()
 // 	mu.Lock()
 // 	id, err := uuid.Parse(ctx.Param("id"))
@@ -256,10 +294,10 @@ type Response struct {
 // 		ctx.JSON(400, Response{false, "Invalid ID", nil})
 // 		return
 // 	}
-	
+
 // 	var newData []models.User
 // 	found := false
-	
+
 // 	for _, user := range Users {
 // 		if user.Id == id {
 // 			found = true
@@ -267,30 +305,29 @@ type Response struct {
 // 		}
 // 		newData = append(newData, user)
 // 	}
-	
+
 // 	if !found {
 // 		ctx.JSON(404, Response{false, "User not found", nil})
 // 		return
 // 	}
-	
+
 // 	Users = newData
 // 	ctx.JSON(200, Response{true, "User deleted successfully", nil})
 // }
-
 
 // // ================================================================================================================ Auth
 
 // func AuthLogin(ctx *gin.Context) {
 // 	var input models.LoginInput
-	
+
 // 	if err := ctx.ShouldBindJSON(&input); err != nil {
 // 		ctx.JSON(400, Response{false, "Invalid request body", nil})
 // 		return
 // 	}
-	
+
 // 	mu.Lock()
 // 	defer mu.Unlock()
-	
+
 // 	for _, user := range Users {
 // 		if user.Email == input.Email {
 
