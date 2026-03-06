@@ -19,14 +19,13 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type UpdateRequest struct {
-	Email     *string   `json:"email"`
-	Picture   *string   `json:"picture"`
-	FullName  *string   `json:"full_name"`
-	Password  *string   `json:"password"`
-	Address   *string   `json:"address"`
-	RoleId    *int      `json:"role_id"`
-	Phone     *string   `json:"phone"`
+type UpdateUsersRequest struct {
+	Picture   string   `json:"picture"`
+	Email     string   `json:"email"`
+	FullName  string   `json:"full_name"`
+	Password  string   `json:"password"`
+	Address   string   `json:"address"`
+	Phone     string   `json:"phone"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
@@ -35,13 +34,8 @@ type AuthResponse struct {
 	Picture  string    `json:"picture"`
 	FullName string    `json:"full_name"`
 	Email    string    `json:"email"`
-	RoleId   int       `json:"role_id"`
 	Address  string    `json:"address"`
+	RoleId   int       `json:"role_id"`
 	Phone    string    `json:"phone"`
 }
 
-// type Response struct {
-// 	Success bool   `json:"success"`
-// 	Message string `json:"message"`
-// 	Results any    `json:"results"`
-// }
