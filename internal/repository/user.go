@@ -90,6 +90,13 @@ WHERE id=$9`
 	return err
 }
 
+// ======================================================================================================== DELETE USER
+func (r *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	query := `DELETE FROM users WHERE id=$1`
+	_, err := r.db.Exec(ctx, query, id)
+	return err
+}
+
 // func (s *UserService) Register(ctx context.Context, req models.CreateUserRequest) error {
 // 	if err := validateUser(req.Fullname, req.Email, req.Password); err != nil {
 // 		return err
