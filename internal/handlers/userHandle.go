@@ -80,6 +80,31 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	})
 }
 
+func (h *UserHandler) DeleteUser(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid user id",
+		})
+		return
+	}
+
+	if err := h.service.DeleteUser(ctx.Request.Context(), id); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "failed to delete user",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "user delete successfully",
+	})
+}
+
 // import (
 // 	utils "backend/internal"
 // 	"backend/internal/models"
