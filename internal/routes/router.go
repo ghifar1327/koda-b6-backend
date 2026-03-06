@@ -7,12 +7,18 @@ import (
 )
 
 func Router(r *gin.Engine, container *di.Container) {
-	userhandler := container.Userhandle()
 
+	userHandler := container.UserHandler()
+	// Crud
+	users := r.Group("/users")
+	{
+		users.PATCH("/:id", userHandler.UpdateUser)
+	}
+
+	// Auth
 	auth := r.Group("/auth")
 	{
-		auth.POST("/register", userhandler.Register)
+		auth.POST("/register", userHandler.Register)
 	}
 
 }
-	
