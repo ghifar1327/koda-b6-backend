@@ -6,13 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
-
-type Response struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
-	Results any    `json:"results"`
-}
 
 type UserHandler struct {
 	service *service.UserService
@@ -50,6 +45,39 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 		"message": "User registered successfully",
 	})
 
+}
+
+func (h *UserHandler) UpdateUser(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "Invalid user id",
+		})
+		return
+	}
+	var req dto.UpdateUsersRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"Success": false,
+			"Message": err.Error(),
+		})
+		return
+	}
+
+	if err := h.service.UpdateUserProfile(ctx.Request.Context(), id, req); err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": "User not found or update failed",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"Success": true,
+		"Message": "User updated successfully",
+	})
 }
 
 // import (
