@@ -96,3 +96,7 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, req d
 
 	return s.repo.UpdateUser(ctx, id, *user)
 }
+
+func (s *UserService) DeleteUser(ctx context.Context , id uuid.UUID) error{
+	return s.repo.DeleteUser(ctx, id)
+}
