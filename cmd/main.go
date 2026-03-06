@@ -1,5 +1,34 @@
 package main
 
+import (
+	"backend/internal/di"
+	"backend/internal/routes"
+	"context"
+	"os"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	godotenv.Load()
+	dbUrl := os.Getenv("DATABASE_URL")
+
+	conn, err := pgx.Connect(context.Background(), dbUrl)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close(context.Background())
+
+	r := gin.Default()
+
+	container := di.NewContainer(conn)
+	routes.Router(r, container)
+
+	r.Run(":8888")
+}
+
 // import (
 // 	"backend/internal/handlers"
 // 	"backend/internal/middleware"
