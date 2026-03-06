@@ -58,14 +58,14 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 
 func (r *UserRepository) CreateUser(ctx context.Context, u models.User) error {
 	query := `INSERT INTO users (id, full_name, email, password, address, phone, role_id,created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-	_, err := r.db.Exec(ctx, query, 
-		u.Id, 
-		u.FullName, 
-		u.Email, 
-		u.Password, 
-		u.Address, 
-		u.Phone, 
-		u.RoleId, 
+	_, err := r.db.Exec(ctx, query,
+		u.Id,
+		u.FullName,
+		u.Email,
+		u.Password,
+		u.Address,
+		u.Phone,
+		u.RoleId,
 		u.CreatedAt)
 
 	return err
