@@ -19,8 +19,19 @@ func NewUserhadler(s *service.UserService) *UserHandler {
 	}
 }
 
-// ==================================================================== register
+// ====================================================================== get all user
+func (h *UserHandler) GetUsers(ctx *gin.Context) {
+	users, err := h.service.ReadAllUser(ctx.Request.Context())
 
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(200, users)
+}
+
+// ==================================================================== register
 func (h *UserHandler) Register(ctx *gin.Context) {
 	var req dto.RegisterRequest
 
