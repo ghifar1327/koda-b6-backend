@@ -99,7 +99,7 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.service.UpdateUserProfile(ctx.Request.Context(), id, req); err != nil {
+	if err := h.service.UpdateUser(ctx.Request.Context(), id, req); err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "User not found or update failed",

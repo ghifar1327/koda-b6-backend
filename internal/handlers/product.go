@@ -1,5 +1,47 @@
 package handlers
 
+import (
+	"backend/internal/service"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
+
+type ProductHandler struct {
+	service *service.ProductService
+}
+
+func NewProductHandler(s *service.ProductService) *ProductHandler {
+	return &ProductHandler{
+		service: s,
+	}
+}
+
+func (h *ProductHandler) GetProducts(ctx *gin.Context) {
+	products, err := h.service.GetAllProducts(ctx.Request.Context())
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(200, products)
+}
+
+func (h *ProductHandler) GetProductbyID(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+	}
+	product, err := h.service.GetAllProductByID(ctx.Request.Context(), id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "user not found",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, product)
+}
+
 // import (
 // 	"backend/internal/models"
 // 	"time"
