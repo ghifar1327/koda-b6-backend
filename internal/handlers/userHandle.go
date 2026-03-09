@@ -31,6 +31,27 @@ func (h *UserHandler) GetUsers(ctx *gin.Context) {
 	ctx.JSON(200, users)
 }
 
+func (h *UserHandler) GetUserById(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid uuid",
+		})
+		return
+	}
+
+	user, err := h.service.ReadByIdUser(ctx.Request.Context(), id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "user not found",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
+}
+
 // ==================================================================== register
 func (h *UserHandler) Register(ctx *gin.Context) {
 	var req dto.RegisterRequest
