@@ -13,6 +13,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	users := r.Group("/users")
 	{
 		users.GET("", userHandler.GetUsers)
+		users.GET("/:id", userHandler.GetUserById)
 		users.PATCH("/:id", userHandler.UpdateUser)
 		users.DELETE("/:id", userHandler.DeleteUser)
 	}
