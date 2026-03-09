@@ -20,12 +20,13 @@ type LoginRequest struct {
 }
 
 type UpdateUsersRequest struct {
-	Picture   string   `json:"picture"`
-	Email     string   `json:"email"`
-	FullName  string   `json:"full_name"`
-	Password  string   `json:"password"`
-	Address   string   `json:"address"`
-	Phone     string   `json:"phone"`
+	Picture   string    `json:"picture"`
+	Email     string    `json:"email"`
+	FullName  string    `json:"full_name"`
+	Password  string    `json:"password"`
+	Address   string    `json:"address"`
+	Phone     string    `json:"phone"`
+	RoleId    int       `json:"role_id"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
@@ -38,4 +39,3 @@ type AuthResponse struct {
 	RoleId   int       `json:"role_id"`
 	Phone    string    `json:"phone"`
 }
-
