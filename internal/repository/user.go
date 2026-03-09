@@ -5,7 +5,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -20,7 +19,7 @@ func NewUserrepository(db *pgx.Conn) *UserRepository {
 	}
 }
 
-func (r *UserRepository) GetAllUser(ctx *gin.Context) ([]models.User, error) {
+func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) {
 	query := `SELECT id, full_name, picture, email,password ,role_id ,phone, address, created_at, updated_at FROM users`
 
 	rows, err := r.db.Query(ctx, query)
