@@ -7,9 +7,9 @@ import (
 )
 
 func Router(r *gin.Engine, container *di.Container) {
-
+	//=========================================================== CRUD
+	//user
 	userHandler := container.UserHandler()
-	// Crud
 	users := r.Group("/users")
 	{
 		users.GET("", userHandler.GetUsers)
@@ -17,7 +17,17 @@ func Router(r *gin.Engine, container *di.Container) {
 		users.PATCH("/:id", userHandler.UpdateUser)
 		users.DELETE("/:id", userHandler.DeleteUser)
 	}
+	//PRODUCT
+	productHandler := container.ProductHandler()
+	product := r.Group("/products")
+	{
+		product.GET("", productHandler.GetProducts)
+		product.GET("/:id", userHandler.GetUserById)
+	}
 
+
+
+	// =========================================================== FEATURE
 	// Auth
 	auth := r.Group("/auth")
 	{
