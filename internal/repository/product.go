@@ -20,14 +20,21 @@ func NewProductRepository(db *pgx.Conn) *ProductRepository {
 func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Product, error) {
 	query := `
 		SELECT
-			id,
-			name,
-			description,
-			price,
-			stock,
-			cteated_at,
-			updated_atr
-		FROM products`
+			p.id,
+			p.name,
+			p.description,
+			p.price,
+			ARRAY_AGG(c.name , ' ,') AS categories,
+			p.stock,
+			p.created_at,
+			p.updated_at
+		FROM products p
+		JOIN products_categories pc
+			ON p.id = pc.product_id
+		JOIN categories c
+			ON pc.category_id = c.id
+		GROUP BY p.id`
+		
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
@@ -41,6 +48,7 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 			&p.Name,
 			&p.Description,
 			&p.Price,
+			&p.Categories,
 			&p.CreatedAt,
 			&p.UploadedAt,
 		)
@@ -55,20 +63,27 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models.Product, error) {
 	query := `
 		SELECT
-			id,
-			name,
-			description,
-			price,
-			stock,
-			cteated_at,
-			updated_atr
-		FROM products WHERE id=$1`
+			p.id,
+			p.name,
+			p.description,
+			p.price,
+			ARRAY_AGG(c.name , ' ,') AS categories,
+			p.stock,
+			p.created_at,
+			p.updated_at
+		FROM products p
+		JOIN products_categories pc
+			ON p.id = pc.product_id
+		JOIN categories c
+			ON pc.category_id = c.id
+		GROUP BY p.id WHERE id=$1`
 	var product models.Product
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&product.Id,
 		&product.Name,
 		&product.Description,
 		&product.Price,
+		&product.Categories,
 		&product.CreatedAt,
 		&product.UploadedAt,
 	)
