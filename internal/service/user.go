@@ -67,7 +67,7 @@ func (s *UserService) Register(ctx context.Context, req dto.RegisterRequest) err
 	return s.repo.CreateUser(ctx, newUser)
 }
 
-func (s *UserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, req dto.UpdateUsersRequest) error {
+func (s *UserService) UpdateUser(ctx context.Context, id uuid.UUID, req dto.UpdateUsersRequest) error {
 	user, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {
 		return err
@@ -99,6 +99,13 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, req d
 	}
 	if strings.TrimSpace(req.Phone) != "" {
 		user.Phone = req.Phone
+	}
+
+	if req.RoleId != 0 {
+		if req.RoleId != 1 && req.RoleId != 2 {
+			return errors.New("invalid role_id")
+		}
+		user.RoleId = req.RoleId
 	}
 
 	return s.repo.UpdateUser(ctx, id, *user)
