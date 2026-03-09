@@ -37,6 +37,12 @@ func validateUser(fullname string, email string, password string) error {
 	return nil
 }
 
+func (s *UserService) ReadAllUser(ctx context.Context) ([]models.User, error){
+	return s.repo.GetAllUser(ctx)
+}
+
+
+
 func (s *UserService) Register(ctx context.Context, req dto.RegisterRequest) error {
 	if err := validateUser(req.FullName, req.Email, req.Password); err != nil {
 		return err
