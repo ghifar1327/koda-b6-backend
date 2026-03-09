@@ -20,7 +20,19 @@ func NewUserrepository(db *pgx.Conn) *UserRepository {
 }
 
 func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) {
-	query := `SELECT id, full_name, picture, email,password ,role_id ,phone, address, created_at, updated_at FROM users`
+	query := `
+		SELECT 
+			id, 
+			full_name, 
+			picture, 
+			email,
+			password,
+			role_id, 
+			phone, 
+			address, 
+			created_at, 
+			updated_at 
+			FROM users`
 
 	rows, err := r.db.Query(ctx, query)
 
@@ -32,7 +44,18 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 	var users []models.User
 	for rows.Next() {
 		var u models.User
-		err := rows.Scan(&u.Id, &u.FullName, &u.Email, &u.Password, &u.Picture, &u.Address, &u.Phone, &u.CreatedAt, &u.UpdatedAt)
+		err := rows.Scan(
+			&u.Id, 
+			&u.FullName, 
+			&u.Picture, 
+			&u.Email, 
+			&u.Password, 
+			&u.RoleId, 
+			&u.Phone, 
+			&u.Address,
+			&u.CreatedAt, 
+			&u.UpdatedAt,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +66,16 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 
 // ==================================================================================================================================================== Get User By ID
 func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
-	query := `SELECT id, picture, full_name, email, password, address, phone, role_id 
+	query := `
+		SELECT 
+		id, 
+		picture, 
+		full_name, 
+		email, 
+		password, 
+		address, 
+		phone, 
+		role_id 
 			  FROM users WHERE id=$1`
 
 	var user models.User
