@@ -12,6 +12,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	// Crud
 	users := r.Group("/users")
 	{
+		users.GET("", userHandler.GetUsers)
 		users.PATCH("/:id", userHandler.UpdateUser)
 		users.DELETE("/:id", userHandler.DeleteUser)
 	}
