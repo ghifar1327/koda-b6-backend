@@ -118,9 +118,18 @@ func (r *UserRepository) CreateUser(ctx context.Context, u models.User) error {
 // ==================================================================================================================================================== Update User
 
 func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.User) error {
-	query := `UPDATE users 
-SET picture=$1, full_name=$2, email=$3, password=$4, address=$5, phone=$6, role_id=$7, updated_at=$8 
-WHERE id=$9`
+	query := `
+	    UPDATE users 
+	    SET 
+	    	picture=$1, 
+	    	full_name=$2, 
+	    	email=$3, 
+	    	password=$4, 
+	    	address=$5, 
+	    	phone=$6, 
+	    	role_id=$7,
+	    	updated_at=$8 
+	    WHERE id=$9`
 	_, err := r.db.Exec(ctx, query,
 		u.Picture,
 		u.FullName,
