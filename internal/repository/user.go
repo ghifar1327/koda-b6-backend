@@ -43,13 +43,26 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 
 // ==================================================================================================================================================== Get User By ID
 func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
-	query := `SELECT id, picture, full_name, email, password,address, phone, role_id FROM users WHERE id=$1`
+	query := `SELECT id, picture, full_name, email, password, address, phone, role_id 
+			  FROM users WHERE id=$1`
+
 	var user models.User
 
-	err := r.db.QueryRow(ctx, query, id).Scan(&user.Id, &user.Picture, &user.FullName, &user.Email, &user.Password, user.Address, &user.RoleId, &user.Phone)
+	err := r.db.QueryRow(ctx, query, id).Scan(
+		&user.Id,
+		&user.Picture,
+		&user.FullName,
+		&user.Email,
+		&user.Password,
+		&user.Address,
+		&user.Phone,
+		&user.RoleId,
+	)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
