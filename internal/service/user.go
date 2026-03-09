@@ -37,11 +37,12 @@ func validateUser(fullname string, email string, password string) error {
 	return nil
 }
 
-func (s *UserService) ReadAllUser(ctx context.Context) ([]models.User, error){
+func (s *UserService) ReadAllUser(ctx context.Context) ([]models.User, error) {
 	return s.repo.GetAllUser(ctx)
 }
-
-
+func (s *UserService) ReadByIdUser(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	return s.repo.GetUserByID(ctx, id)
+}
 
 func (s *UserService) Register(ctx context.Context, req dto.RegisterRequest) error {
 	if err := validateUser(req.FullName, req.Email, req.Password); err != nil {
@@ -87,7 +88,7 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, req d
 		user.Email = req.Email
 	}
 	if strings.TrimSpace(req.Password) != "" && len(req.Password) > 5 {
-		newPwd , err :=  utils.HashPassword(req.Password)
+		newPwd, err := utils.HashPassword(req.Password)
 		if err != nil {
 			return errors.New("password must be at least 5 characters")
 		}
@@ -103,6 +104,6 @@ func (s *UserService) UpdateUserProfile(ctx context.Context, id uuid.UUID, req d
 	return s.repo.UpdateUser(ctx, id, *user)
 }
 
-func (s *UserService) DeleteUser(ctx context.Context , id uuid.UUID) error{
+func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return s.repo.DeleteUser(ctx, id)
 }
