@@ -1,0 +1,19 @@
+DROP TABLE images CASCADE;
+DROP TABLE categories CASCADE;
+DROP TABLE variants CASCADE;
+DROP TABLE sizes CASCADE;
+DROP TABLE methods CASCADE;
+DROP TABLE role CASCADE;
+DROP TABLE vouchers CASCADE;
+DROP TABLE products CASCADE;
+
+
+DROP TABLE product_images CASCADE;
+DROP TABLE products_categories CASCADE;
+DROP TABLE transaction_details CASCADE;
+DROP TABLE transactions CASCADE;
+DROP TABLE discount CASCADE;
+
+DROP TABLE testimony CASCADE;
+
+DROP TABLE users CASCADE ;
