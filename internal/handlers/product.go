@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/internal/dto"
 	"backend/internal/service"
 	"net/http"
 	"strconv"
@@ -40,6 +41,30 @@ func (h *ProductHandler) GetProductbyID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, product)
+}
+
+func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
+	var req dto.CreteProductRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Ok:      false,
+			Message: "Invalid Request Body",
+		})
+		return
+	}
+	err := h.service.CreateProduct(ctx, req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Ok:      false,
+			Message: err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Response{
+		Ok: true,
+		Message: "Create product successfully",
+	})
 }
 
 // import (
