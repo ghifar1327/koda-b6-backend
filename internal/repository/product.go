@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
 
@@ -24,7 +25,7 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 			p.name,
 			p.description,
 			p.price,
-			ARRAY_AGG(c.name , ' ,') AS categories,
+			ARRAY_AGG(c.name) AS categories,
 			p.stock,
 			p.created_at,
 			p.updated_at
@@ -34,7 +35,7 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 		JOIN categories c
 			ON pc.category_id = c.id
 		GROUP BY p.id`
-		
+
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
@@ -49,6 +50,7 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 			&p.Description,
 			&p.Price,
 			&p.Categories,
+			&p.Stoct,
 			&p.CreatedAt,
 			&p.UploadedAt,
 		)
@@ -67,7 +69,7 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 			p.name,
 			p.description,
 			p.price,
-			ARRAY_AGG(c.name , ' ,') AS categories,
+			ARRAY_AGG(c.name) AS categories,
 			p.stock,
 			p.created_at,
 			p.updated_at
@@ -84,6 +86,7 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 		&product.Description,
 		&product.Price,
 		&product.Categories,
+		&product.Stoct,
 		&product.CreatedAt,
 		&product.UploadedAt,
 	)
@@ -91,4 +94,23 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 		return nil, err
 	}
 	return &product, nil
+}
+
+func (r *ProductRepository) CreateProduct(ctx context.Context, p dto.CreteProductRequest) error {
+	query := `INSERT INTO 
+		products (
+			name,
+			description,
+			price,
+			stoct,
+			crated_at) VALUES (1$, $2, $3, $4, $5)`
+	_, err := r.db.Exec(ctx, query,
+		p.Name,
+		p.Description,
+		p.Price,
+		p.Stoct,
+		p.CreatedAt,
+	)
+
+	return err
 }
