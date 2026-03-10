@@ -1,7 +1,11 @@
 package dto
 
-type CheckoutRequest struct {
-	UserId   int    `json:"user_id"`
-	Address  string `json:"address"`
-	Delivery int    `json:"delivery"`
+import "time"
+
+type CreteProductRequest struct {
+	Name         string
+	Description string
+	Price        int
+	Stoct        int
+	CreatedAt    time.Time
 }
