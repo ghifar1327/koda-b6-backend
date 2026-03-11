@@ -10,6 +10,8 @@ func Router(r *gin.Engine, container *di.Container) {
 	//=========================================================== CRUD
 	//user
 	userHandler := container.UserHandler()
+	forgotPwdHandler := container.ForgotPwdHandle()
+
 	users := r.Group("/users")
 	{
 		users.GET("", userHandler.GetUsers)
@@ -26,13 +28,13 @@ func Router(r *gin.Engine, container *di.Container) {
 		product.GET("/:id", productHandler.GetProductbyID)
 	}
 
-
-
 	// =========================================================== FEATURE
 	// Auth
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", userHandler.Register)
+		auth.POST("forgot-password", forgotPwdHandler.RequestForgotPwd)
+		auth.PATCH("forgot-pasaword", forgotPwdHandler.Reretpassword)
 	}
 
 }
