@@ -25,6 +25,11 @@ type Container struct {
 	productRepo    *repository.ProductRepository
 	productService *service.ProductService
 	productHandler *handlers.ProductHandler
+
+	// REVIEW PRODUCT
+	reviewProductRepo     *repository.ReviewProductRepository
+	reviewProductSevice  *service.ReviewProductService
+	reviewProductHandler *handlers.ReviewProductHandler
 }
 
 func NewContainer(db *pgx.Conn) *Container {
@@ -53,6 +58,11 @@ func (c *Container) initDependencies() {
 	c.fpRepo = repository.NewForgotPWDRepository(c.db)
 	c.fpService = service.NewForgotPwdService(c.userRepo, c.fpRepo)
 	c.fpHandler = handlers.NewForgitPwdHandler(c.fpService)
+
+	// REVIEW PRODUCT
+	c.reviewProductRepo = repository.NewReviewProductRepository(c.db)
+	c.reviewProductSevice = service.NewReviewProductService(c.reviewProductRepo)
+	c.reviewProductHandler = handlers.NewReviewProductHandler(c.reviewProductSevice)
 }
 
 func (c *Container) UserHandler() *handlers.UserHandler {
@@ -65,4 +75,8 @@ func (c *Container) ProductHandler() *handlers.ProductHandler {
 
 func (c *Container) ForgotPwdHandle() *handlers.ForgotPwdHandler {
 	return c.fpHandler
+}
+
+func (c *Container) ReviewProductHandler() *handlers.ReviewProductHandler {
+	return c.reviewProductHandler
 }
