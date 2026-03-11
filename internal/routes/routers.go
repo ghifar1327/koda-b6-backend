@@ -12,20 +12,23 @@ func Router(r *gin.Engine, container *di.Container) {
 	userHandler := container.UserHandler()
 	forgotPwdHandler := container.ForgotPwdHandle()
 
-	users := r.Group("/users")
+	admin := r.Group("/admin")
 	{
-		users.GET("", userHandler.GetUsers)
-		users.GET("/:id", userHandler.GetUserById)
-		users.PATCH("/:id", userHandler.UpdateUser)
-		users.DELETE("/:id", userHandler.DeleteUser)
-	}
-	//PRODUCT
-	productHandler := container.ProductHandler()
-	product := r.Group("/products")
-	{
-		product.POST("", productHandler.CreateProduct)
-		product.GET("", productHandler.GetProducts)
-		product.GET("/:id", productHandler.GetProductbyID)
+		users := admin.Group("/users")
+		{
+			users.GET("", userHandler.GetUsers)
+			users.GET("/:id", userHandler.GetUserById)
+			users.PATCH("/:id", userHandler.UpdateUser)
+			users.DELETE("/:id", userHandler.DeleteUser)
+		}
+		//PRODUCT
+		productHandler := container.ProductHandler()
+		product := admin.Group("/products")
+		{
+			product.POST("", productHandler.CreateProduct)
+			product.GET("", productHandler.GetProducts)
+			product.GET("/:id", productHandler.GetProductbyID)
+		}
 	}
 
 	// =========================================================== FEATURE
