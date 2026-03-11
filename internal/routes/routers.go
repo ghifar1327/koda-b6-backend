@@ -11,6 +11,8 @@ func Router(r *gin.Engine, container *di.Container) {
 	//user
 	userHandler := container.UserHandler()
 	forgotPwdHandler := container.ForgotPwdHandle()
+	productHandler := container.ProductHandler()
+	reviewProductHandler := container.ReviewProductHandler()
 
 	admin := r.Group("/admin")
 	{
@@ -22,12 +24,18 @@ func Router(r *gin.Engine, container *di.Container) {
 			users.DELETE("/:id", userHandler.DeleteUser)
 		}
 		//PRODUCT
-		productHandler := container.ProductHandler()
 		product := admin.Group("/products")
 		{
 			product.POST("", productHandler.CreateProduct)
 			product.GET("", productHandler.GetProducts)
 			product.GET("/:id", productHandler.GetProductbyID)
+		}
+		reviewProduct := admin.Group("/review-product")
+		{
+			reviewProduct.GET("", reviewProductHandler.GetReviewProducts)
+			reviewProduct.GET("/:id", reviewProductHandler.GetReviewProductbyID)
+			reviewProduct.PATCH("/:id", reviewProductHandler.UpdateReviewProduct)
+			reviewProduct.DELETE("/:id", reviewProductHandler.DeleteReviewProduct)
 		}
 	}
 
