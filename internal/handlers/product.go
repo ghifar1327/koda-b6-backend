@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backend/internal/dto"
+	"backend/internal/models"
 	"backend/internal/service"
 	"net/http"
 	"strconv"
@@ -44,7 +45,7 @@ func (h *ProductHandler) GetProductbyID(ctx *gin.Context) {
 }
 
 func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
-	var req dto.CreteProductRequest
+	var req models.Product
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
@@ -62,7 +63,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, dto.Response{
-		Ok: true,
+		Ok:      true,
 		Message: "Create product successfully",
 	})
 }
