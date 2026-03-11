@@ -21,8 +21,9 @@ func Router(r *gin.Engine, container *di.Container) {
 	productHandler := container.ProductHandler()
 	product := r.Group("/products")
 	{
+		product.POST("", productHandler.CreateProduct)
 		product.GET("", productHandler.GetProducts)
-		product.GET("/:id", userHandler.GetUserById)
+		product.GET("/:id", productHandler.GetProductbyID)
 	}
 
 
