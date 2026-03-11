@@ -105,10 +105,10 @@ CREATE TABLE if NOT EXISTS product_images (
 );
 
 -- =================================================================================== TESTIMONY
-CREATE TABLE if NOT EXISTS testimony (
+CREATE TABLE if NOT EXISTS review_product (
     id SERIAL PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    id_transaction_details INT REFERENCES products(id) ON DELETE CASCADE,
+    id_transaction_details INT REFERENCES transaction_details(id) ON DELETE CASCADE,
     rating DECIMAL(2,1) CHECK (rating BETWEEN 1 AND 5),
     message TEXT
 );
