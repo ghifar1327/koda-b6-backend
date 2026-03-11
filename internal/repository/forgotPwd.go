@@ -17,19 +17,19 @@ func NewDataRepository(db *pgx.Conn) *DataRepository {
 	}
 }
 
-func (r *UserRepository) CreateData(ctx context.Context, f models.ForgotPassword) error {
+func (r *DataRepository) CreateData(ctx context.Context, f models.ForgotPassword) error {
 	query := `INSERT INTO forgot_pwd (email, code) VALUES ($1, $2)`
 	_, err := r.db.Exec(ctx, query, f.Email, f.Code)
 
 	return err
 }
 
-func (r *UserRepository) GetDataByEmail(ctx context.Context, email string) (*models.ForgotPassword, error) {
+func (r *DataRepository) GetDataByEmail(ctx context.Context, email string) (*models.ForgotPassword, error) {
 	query := `
 		SELECT 
 		email,
 		code
-			  FROM forgot_pwd email=$1`
+		FROM forgot_pwd WHERE email=$1`
 
 	var fp models.ForgotPassword
 
@@ -45,7 +45,7 @@ func (r *UserRepository) GetDataByEmail(ctx context.Context, email string) (*mod
 	return &fp, nil
 }
 
-func (r *UserRepository) DeleteDataByCode(ctx context.Context, code int) error {
+func (r *DataRepository) DeleteDataByCode(ctx context.Context, code int) error {
 	query := `DELETE FROM forgot_pwd WHERE code=$1`
 	_, err := r.db.Exec(ctx, query, code)
 	return err

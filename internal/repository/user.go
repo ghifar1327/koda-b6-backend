@@ -45,15 +45,15 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 	for rows.Next() {
 		var u models.User
 		err := rows.Scan(
-			&u.Id, 
-			&u.FullName, 
-			&u.Picture, 
-			&u.Email, 
-			&u.Password, 
-			&u.RoleId, 
-			&u.Phone, 
+			&u.Id,
+			&u.FullName,
+			&u.Picture,
+			&u.Email,
+			&u.Password,
+			&u.RoleId,
+			&u.Phone,
 			&u.Address,
-			&u.CreatedAt, 
+			&u.CreatedAt,
 			&u.UpdatedAt,
 		)
 		if err != nil {
@@ -150,22 +150,42 @@ func (r *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-// func (s *UserService) Register(ctx context.Context, req models.CreateUserRequest) error {
-// 	if err := validateUser(req.Fullname, req.Email, req.Password); err != nil {
-// 		return err
-// 	}
 
-// 	argon := argon2.DefaultConfig()
-// 	encoded, err := argon.HashEncoded([]byte(req.Password))
+func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	query := `
+		SELECT 
+			id,
+			full_name,
+			picture,
+			email,
+			password,
+			role_id,
+			phone,
+			address,
+			created_at,
+			updated_at
+		FROM users
+		WHERE email=$1
+	`
 
-// 	if err != nil {
-// 		return err
-// 	}
+	var user models.User
 
-// 	newUser := models.User{
-// 		Fullname: req.Fullname,
-// 		Email:    req.Email,
-// 		Password: string(encoded),
-// 	}
-// 	return s.repo.Create(ctx, newUser)
-// }
+	err := r.db.QueryRow(ctx, query, email).Scan(
+		&user.Id,
+		&user.FullName,
+		&user.Picture,
+		&user.Email,
+		&user.Password,
+		&user.RoleId,
+		&user.Phone,
+		&user.Address,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
