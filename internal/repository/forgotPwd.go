@@ -7,24 +7,24 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type DataRepository struct {
+type ForgotPWDRepository struct {
 	db *pgx.Conn
 }
 
-func NewDataRepository(db *pgx.Conn) *DataRepository {
-	return &DataRepository{
+func NewForgotPWDRepository(db *pgx.Conn) *ForgotPWDRepository {
+	return &ForgotPWDRepository{
 		db: db,
 	}
 }
 
-func (r *DataRepository) CreateData(ctx context.Context, f models.ForgotPassword) error {
+func (r *ForgotPWDRepository) CreateForgotPWD(ctx context.Context, f models.ForgotPassword) error {
 	query := `INSERT INTO forgot_pwd (email, code) VALUES ($1, $2)`
 	_, err := r.db.Exec(ctx, query, f.Email, f.Code)
 
 	return err
 }
 
-func (r *DataRepository) GetDataByEmail(ctx context.Context, email string) (*models.ForgotPassword, error) {
+func (r *ForgotPWDRepository) GetForgotPWDByEmail(ctx context.Context, email string) (*models.ForgotPassword, error) {
 	query := `
 		SELECT 
 		email,
@@ -45,7 +45,7 @@ func (r *DataRepository) GetDataByEmail(ctx context.Context, email string) (*mod
 	return &fp, nil
 }
 
-func (r *DataRepository) DeleteDataByCode(ctx context.Context, code int) error {
+func (r *ForgotPWDRepository) DeleteForgotPWDByCode(ctx context.Context, code int) error {
 	query := `DELETE FROM forgot_pwd WHERE code=$1`
 	_, err := r.db.Exec(ctx, query, code)
 	return err

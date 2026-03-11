@@ -1,6 +1,7 @@
 package service
 
 import (
+	"backend/internal/dto"
 	"backend/internal/models"
 	"backend/internal/repository"
 	"backend/internal/utils"
@@ -10,10 +11,10 @@ import (
 
 type ForgotPwdService struct {
 	userRepo *repository.UserRepository
-	fgRepo   *repository.DataRepository
+	fgRepo   *repository.ForgotPWDRepository
 }
 
-func newForgotPwdService(ur *repository.UserRepository, fg *repository.DataRepository) *ForgotPwdService {
+func NewForgotPwdService(ur *repository.UserRepository, fg *repository.ForgotPWDRepository) *ForgotPwdService {
 	return &ForgotPwdService{
 		userRepo: ur,
 		fgRepo:   fg,
@@ -34,26 +35,32 @@ func (s *ForgotPwdService) RequestForgotPwd(ctx context.Context, email string) e
 		Email: user.Email,
 		Code:  otp,
 	}
-	return s.fgRepo.CreateData(ctx, newData)
+	return s.fgRepo.CreateForgotPWD(ctx, newData)
 }
 
-
-func (s *ForgotPwdService) ResetPassword(ctx context.Context, email string, code int) error {
-	user, err := s.userRepo.GetUserByEmail(ctx, email)
-	if err != nil {
-		return err
-	}
-	
-	data, err := s.fgRepo.GetDataByEmail(ctx, email)
+func (s *ForgotPwdService) ResetPassword(ctx context.Context, req dto.ResetPwdRequest) error {
+	user, err := s.userRepo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		return err
 	}
 
-	if data.Code != code {
+	data, err := s.fgRepo.GetForgotPWDByEmail(ctx, req.Email)
+	if err != nil {
+		return err
+	}
+
+	if data.Code != req.Code {
 		return errors.New("invalid code")
 	}
-	if err := s.userRepo.UpdateUser(ctx , user.Id , *user); err !=nil{
+
+	newPWD, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
 		return err
 	}
-	return s.fgRepo.DeleteDataByCode(ctx, code)
+
+	user.Password = newPWD
+	if err := s.userRepo.UpdateUser(ctx, user.Id, *user); err != nil {
+		return err
+	}
+	return s.fgRepo.DeleteForgotPWDByCode(ctx, req.Code)
 }
