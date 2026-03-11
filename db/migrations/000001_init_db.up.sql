@@ -46,10 +46,10 @@ CREATE TABLE if NOT EXISTS vouchers (
 );
 -- ============================================================================= TRANSACTIONS
 CREATE TABLE if NOT EXISTS transactions (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
     status VARCHAR(100) NOT NULL,
-    id_methode INT REFERENCES methods(id),
+    id_method INT REFERENCES methods(id),
     payment_method VARCHAR(100) NOT NULL,
     id_voucher INT REFERENCES vouchers(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -65,7 +65,7 @@ CREATE TABLE if NOT EXISTS sizes (
 -- ============================================================================== TRANSACTION DETAIL
 CREATE TABLE if NOT EXISTS transaction_details (
     id SERIAL PRIMARY KEY,
-    transaction_id INT REFERENCES transactions(id) ON DELETE CASCADE,
+    transaction_id UUID REFERENCES transactions(id) ON DELETE CASCADE,
     product_id INT REFERENCES products(id),
     size_id INT REFERENCES sizes(id)
 );
