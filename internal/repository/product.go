@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -96,14 +96,14 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 	return &product, nil
 }
 
-func (r *ProductRepository) CreateProduct(ctx context.Context, p dto.CreteProductRequest) error {
+func (r *ProductRepository) CreateProduct(ctx context.Context, p models.Product) error {
 	query := `INSERT INTO 
 		products (
 			name,
 			description,
 			price,
 			stoct,
-			crated_at) VALUES (1$, $2, $3, $4, $5)`
+			crated_at) VALUES ($1, $2, $3, $4, $5)`
 	_, err := r.db.Exec(ctx, query,
 		p.Name,
 		p.Description,
@@ -112,5 +112,31 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, p dto.CreteProduc
 		p.CreatedAt,
 	)
 
+	return err
+}
+
+func (r *ProductRepository) UpdateProduct(ctx context.Context, id int, p models.Product) error {
+	query := `
+	    UPDATE products
+	    SET 
+	    	name=$1, 
+	    	description=$2, 
+	    	price=$3, 
+	    	stock=$4, 
+	    	cearted_at=$5 
+	    WHERE id=$6`
+	_, err := r.db.Exec(ctx, query,
+		p.Name,
+		p.Description,
+		p.Price,
+		p.Stoct,
+		time.Now(),
+		id)
+	return err
+}
+
+func (r *ProductRepository) DeleteProduct(ctx context.Context, id int) error {
+	query := `DELETE FROM Products WHERE id=$1`
+	_, err := r.db.Exec(ctx, query, id)
 	return err
 }
