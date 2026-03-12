@@ -25,14 +25,13 @@ type ReviewProduct struct {
 	Message             string    `db:"message"`
 }
 
-
 type Reviews struct {
-	Id          int     `db:"id"`
-	Name        string  `db:"name"`
-	Image       string  `db:"url"`
-	Description string  `db:"description"`
-	Price       int     `db:"price"`
-	Rating      float64 `db:"rating"`
+	Id          int    `db:"id"`
+	Name        string `db:"name"`
+	Image       string `db:"url"`
+	Description string `db:"description"`
+	Price       int    `db:"price"`
+	TotalReview int    `db:"total_review"`
 }
 
 type RecommendedProduct struct {

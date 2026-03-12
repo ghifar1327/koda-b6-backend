@@ -20,74 +20,67 @@ func NewLandingRepository(db *pgx.Conn) *LandingRepository {
 func (r *LandingRepository) GetAllReviewProducs(ctx context.Context) ([]models.Reviews, error) {
 	query := `
 		SELECT 
-    	p.id,
-    	p.name,
-    	i.url AS images,
-    	p.description,
-    	p.price,
-    	rp.rating
-		FROM review_product rp
-		JOIN transaction_details td ON rp.id_transaction_details = td.id
-		JOIN products p ON td.product_id = p.id
-		LEFT JOIN product_images pi ON p.id = pi.product_id
-		LEFT JOIN images i ON pi.image_id = i.id;`
+        p.id,
+        p.name,
+        i.url AS image,
+        p.description,
+        p.price,
+        COUNT(rp.id) AS total_review
+        FROM review_product rp
+        JOIN transaction_details td ON rp.id_transaction_details = td.id
+        JOIN products p ON td.product_id = p.id
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        LEFT JOIN images i ON pi.image_id = i.id
+        GROUP BY p.id,p.name,i.url,p.description,p.price
+        ORDER BY total_review DESC;
+	`
 
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var reviews []models.Reviews
-	for rows.Next() {
-		var rp models.Reviews
-		err := rows.Scan(
-			&rp.Id,
-			&rp.Name,
-			&rp.Image,
-			&rp.Description,
-			&rp.Price,
-			&rp.Rating,
-		)
-		if err != nil {
-			return nil, err
-		}
-		reviews = append(reviews, rp)
-	}
-	return reviews, nil
-}
 
-func (r *LandingRepository) GetReviwProductByID(ctx context.Context, id int) (*models.Reviews, error) {
-	query := `
-		SELECT 
-    	p.id,
-    	p.name,
-    	i.url AS images,
-    	p.description,
-    	p.price,
-    	rp.rating
-		FROM review_product rp
-		JOIN transaction_details td ON rp.id_transaction_details = td.id
-		JOIN products p ON td.product_id = p.id
-		LEFT JOIN product_images pi ON p.id = pi.product_id
-		LEFT JOIN images i ON pi.image_id = i.id 
-		WHERE id=$1`
-	var rp models.Reviews
-	err := r.db.QueryRow(ctx, query, id).Scan(
-		&rp.Id,
-		&rp.Name,
-		&rp.Image,
-		&rp.Description,
-		&rp.Price,
-		&rp.Rating,
-	)
+	reviews, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Reviews])
 	if err != nil {
 		return nil, err
 	}
-	return &rp, nil
-}
-// ======================================================================================================================== 	RECOMMENDED PRODUCT
 
-func (r *LandingRepository) GetAllRecommendedProducts(ctx context.Context) ([]models.RecommendedProduct, error) {
+	return reviews, nil
+}
+func (r *LandingRepository) GetReviwProductByID(ctx context.Context, id int) (*models.Reviews, error) {
+	query := `
+		SELECT 
+        p.id,
+        p.name,
+        i.url AS image,
+        p.description,
+        p.price,
+        COUNT(rp.id) AS total_review
+        FROM review_product rp
+        JOIN transaction_details td ON rp.id_transaction_details = td.id
+        JOIN products p ON td.product_id = p.id
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        LEFT JOIN images i ON pi.image_id = i.id
+		WHERE p.id=$1
+        GROUP BY p.id,p.name,i.url,p.description,p.price;`
+
+	rows, err := r.db.Query(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	review, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Reviews])
+	if err != nil {
+		return nil, err
+	}
+
+	return &review, nil
+}
+
+// ======================================================================================================================================================== RECOMMENDED PRODUCT
+
+func (r *LandingRepository) GetRecommendedProducts(ctx context.Context) ([]models.RecommendedProduct, error) {
 	query := `
 		SELECT 
         p.id,
@@ -111,54 +104,39 @@ func (r *LandingRepository) GetAllRecommendedProducts(ctx context.Context) ([]mo
 		return nil, err
 	}
 	defer rows.Close()
-	var recommended []models.RecommendedProduct
-	for rows.Next() {
-		var rp models.RecommendedProduct
-		err := rows.Scan(
-			&rp.Id,
-			&rp.Name,
-			&rp.Image,
-			&rp.Description,
-			&rp.Price,
-			&rp.TotalReview,
-			&rp.AvgRating,
-		)
-		if err != nil {
-			return nil, err
-		}
-		recommended = append(recommended, rp)
+	recommended, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.RecommendedProduct])
+	if err != nil {
+		return nil, err
 	}
+
 	return recommended, nil
 }
 
 func (r *LandingRepository) GetRecommendedProductByID(ctx context.Context, id int) (*models.RecommendedProduct, error) {
 	query := `
 		SELECT 
-    	p.id,
-    	p.name,
-    	i.url AS images,
-    	p.description,
-    	p.price,
-    	rp.rating
-		FROM review_product rp
-		JOIN transaction_details td ON rp.id_transaction_details = td.id
-		JOIN products p ON td.product_id = p.id
-		LEFT JOIN product_images pi ON p.id = pi.product_id
-		LEFT JOIN images i ON pi.image_id = i.id 
-		WHERE id=$1`
-	var rp models.RecommendedProduct
-	err := r.db.QueryRow(ctx, query, id).Scan(
-		&rp.Id,
-		&rp.Name,
-		&rp.Image,
-		&rp.Description,
-		&rp.Price,
-		&rp.TotalReview,
-		&rp.AvgRating,
-	)
+        p.id,
+        p.name,
+        i.url AS image,
+        p.description,
+        p.price,
+        COUNT(rp.id) AS total_review,
+        AVG(rp.rating) AS avg_rating
+  	    FROM review_product rp
+  	    JOIN transaction_details td ON rp.id_transaction_details = td.id
+  	    JOIN products p ON td.product_id = p.id
+  	    LEFT JOIN product_images pi ON p.id = pi.product_id
+  	    LEFT JOIN images i ON pi.image_id = i.id
+		WHERE p.id=$1
+  	    GROUP BY p.id, p.name, i.url, p.description, p.price`
+	rows, err := r.db.Query(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	rp, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.RecommendedProduct])
 	if err != nil {
 		return nil, err
 	}
 	return &rp, nil
 }
-
