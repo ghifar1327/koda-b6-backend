@@ -13,9 +13,11 @@ func Router(r *gin.Engine, container *di.Container) {
 	//user
 	userHandler := container.UserHandler()
 	forgotPwdHandler := container.ForgotPwdHandle()
-	landingHandler := container.LandingHandler()
 	productHandler := container.ProductHandler()
+	landingHandler := container.LandingHandler()
 	reviewProductHandler := container.ReviewProductHandler()
+	transactionHandler := container.TransactionHandler()
+
 	admin := r.Group("/admin")
 	{
 		//users
@@ -43,6 +45,13 @@ func Router(r *gin.Engine, container *di.Container) {
 		auth.POST("/register", userHandler.Register)
 		auth.POST("forgot-password", forgotPwdHandler.RequestForgotPwd)
 		auth.PATCH("forgot-pasaword", forgotPwdHandler.Reretpassword)
+	}
+
+	// TRANSACSION
+	transaction := r.Group("/transaction")
+	{
+		transaction.GET("", transactionHandler.GetAllTransactions)
+		transaction.GET("/:id", transactionHandler.GetTransactionbyID)
 	}
 
 	//reviews
