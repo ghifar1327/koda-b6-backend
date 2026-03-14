@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"backend/internal/dto"
-	"backend/internal/models"
 	"backend/internal/service"
 	"net/http"
 
@@ -45,7 +44,7 @@ func (h *TransactionHandler) GetTransactionbyID(ctx *gin.Context) {
 }
 
 func (h *TransactionHandler) CreateTransaction(ctx *gin.Context) {
-	var req models.Transaction
+	var req dto.CreateRransactionRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
