@@ -7,15 +7,18 @@ import (
 )
 
 func Router(r *gin.Engine, container *di.Container) {
+
 	//=========================================================== CRUD
+
 	//user
 	userHandler := container.UserHandler()
 	forgotPwdHandler := container.ForgotPwdHandle()
+	landingHandler := container.LandingHandler()
 	productHandler := container.ProductHandler()
 	reviewProductHandler := container.ReviewProductHandler()
-
 	admin := r.Group("/admin")
 	{
+		//users
 		users := admin.Group("/users")
 		{
 			users.GET("", userHandler.GetUsers)
@@ -30,16 +33,10 @@ func Router(r *gin.Engine, container *di.Container) {
 			product.GET("", productHandler.GetProducts)
 			product.GET("/:id", productHandler.GetProductbyID)
 		}
-		reviewProduct := admin.Group("/review-product")
-		{
-			reviewProduct.GET("", reviewProductHandler.GetReviewProducts)
-			reviewProduct.GET("/:id", reviewProductHandler.GetReviewProductbyID)
-			reviewProduct.PATCH("/:id", reviewProductHandler.UpdateReviewProduct)
-			reviewProduct.DELETE("/:id", reviewProductHandler.DeleteReviewProduct)
-		}
-	}
 
+	}
 	// =========================================================== FEATURE
+
 	// Auth
 	auth := r.Group("/auth")
 	{
@@ -48,4 +45,21 @@ func Router(r *gin.Engine, container *di.Container) {
 		auth.PATCH("forgot-pasaword", forgotPwdHandler.Reretpassword)
 	}
 
+	//reviews
+	reviewProduct := r.Group("/review-product")
+	{
+		reviewProduct.GET("", reviewProductHandler.GetReviewProducts)
+		reviewProduct.GET("/:id", reviewProductHandler.GetReviewProductbyID)
+		reviewProduct.PATCH("/:id", reviewProductHandler.UpdateReviewProduct)
+		reviewProduct.DELETE("/:id", reviewProductHandler.DeleteReviewProduct)
+	}
+
+	// Landing
+	landing := r.Group("/")
+	{
+		landing.GET("/reviews", landingHandler.GetAllReviewProducts)
+		landing.GET("/reviews/:id", landingHandler.GetRecommendedProductByID)
+		landing.GET("/recommended-product", landingHandler.GetRecommendedProducts)
+		landing.GET("/recommended-product/:id", landingHandler.GetRecommendedProductByID)
+	}
 }
