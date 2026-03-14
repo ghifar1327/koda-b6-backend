@@ -5,6 +5,7 @@ import (
 	"backend/internal/service"
 	"net/http"
 	"strconv"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,26 +19,49 @@ func NewLandingHandler(s *service.LandingService) *LandingHandler {
 	}
 }
 
+
+// GetAllReviewProducts godoc
+// @Summary Get all review products
+// @Description Retrieve all review products for landing page
+// @Tags Landing
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.ReviewProduct
+// @Failure 500 {object} dto.Response
+// @Router /landing/reviews [get]
 func (h *LandingHandler) GetAllReviewProducts(ctx *gin.Context) {
 	products, err := h.service.GetAllReviewProducts(ctx.Request.Context())
 	if err != nil {
 		ctx.JSON(500, dto.Response{
-			Ok : false,
+			Success: false,
 			Message: err.Error()})
 		return
 	}
 	ctx.JSON(200, products)
 }
 
+
+// GetReviewProductByID godoc
+// @Summary Get review product by ID
+// @Description Retrieve review product by ID
+// @Tags Landing
+// @Accept json
+// @Produce json
+// @Param id path int true "Review Product ID"
+// @Success 200 {object} models.ReviewProduct
+// @Failure 400 {object} dto.Response
+// @Failure 404 {object} dto.Response
+// @Router /landing/reviews/{id} [get]
 func (h *LandingHandler) GetReviwProductByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
 	}
 	product, err := h.service.GetReviwProductByID(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
-			Ok: false,
+			Success: false,
 			Message: "review not found",
 		})
 		return
@@ -45,17 +69,39 @@ func (h *LandingHandler) GetReviwProductByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, product)
 }
 
+
+// GetRecommendedProducts godoc
+// @Summary Get recommended products
+// @Description Retrieve recommended products for landing page
+// @Tags Landing
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.Product
+// @Failure 500 {object} dto.Response
+// @Router /landing/recommended [get]
 func (h *LandingHandler) GetRecommendedProducts(ctx *gin.Context) {
 	products, err := h.service.GetRecommendedProducts(ctx.Request.Context())
 	if err != nil {
 		ctx.JSON(500, dto.Response{
-			Ok : false,
+			Success: false,
 			Message: err.Error()})
 		return
 	}
 	ctx.JSON(200, products)
 }
 
+
+// GetRecommendedProductByID godoc
+// @Summary Get recommended product by ID
+// @Description Retrieve recommended product detail by ID
+// @Tags Landing
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} models.Product
+// @Failure 400 {object} dto.Response
+// @Failure 404 {object} dto.Response
+// @Router /landing/recommended/{id} [get]
 func (h *LandingHandler) GetRecommendedProductByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -64,7 +110,7 @@ func (h *LandingHandler) GetRecommendedProductByID(ctx *gin.Context) {
 	product, err := h.service.GetRecommendedProductByID(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
-			Ok: false,
+			Success: false,
 			Message: "review not found",
 		})
 		return
