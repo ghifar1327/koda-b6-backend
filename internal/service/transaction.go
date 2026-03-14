@@ -1,12 +1,11 @@
 package service
 
 import (
+	"backend/internal/dto"
 	"backend/internal/models"
 	"backend/internal/repository"
 	"context"
 	"strings"
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -28,15 +27,13 @@ func (s *TransactionService) GetAllTransactionByID(ctx context.Context, id uuid.
 	return s.repo.GetTransactionByID(ctx, id)
 }
 
-func (s *TransactionService) CreateTransaction(ctx context.Context, req models.Transaction) error {
-	newTransaction := models.Transaction{
-		Id:             uuid.New(),
-		UserId:         req.UserId,
-		Status:         req.Status,
-		IdMethod:       req.IdMethod,
-		PaymentMethode: req.PaymentMethode,
-		IdVoucher:      req.IdVoucher,
-		CreatedAt:      time.Now(),
+func (s *TransactionService) CreateTransaction(ctx context.Context, req dto.CreateRransactionRequest) error {
+	newTransaction := dto.CreateRransactionRequest{
+		UserId:        req.UserId,
+		Status:        req.Status,
+		IdMethod:      req.IdMethod,
+		PaymentMethod: req.PaymentMethod,
+		IdVoucher:     req.IdVoucher,
 	}
 	return s.repo.CreateTransaction(ctx, newTransaction)
 }
@@ -50,8 +47,9 @@ func (s *TransactionService) UpdateTransaction(ctx context.Context, id uuid.UUID
 	if strings.TrimSpace(req.Status) != "" {
 		Transaction.Status = req.Status
 	}
+	newTransaction := Transaction.Status
 
-	return s.repo.UpdateTransaction(ctx, id, *Transaction)
+	return s.repo.UpdateTransaction(ctx, id, newTransaction)
 }
 
 func (s *TransactionService) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
