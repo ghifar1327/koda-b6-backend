@@ -1,14 +1,17 @@
 package routes
 
 import (
-	"backend/internal/di"
-
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "backend/docs"
+	"backend/internal/di"
 )
 
 func Router(r *gin.Engine, container *di.Container) {
 
-	//=========================================================== CRUD
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	//user
 	userHandler := container.UserHandler()
@@ -44,7 +47,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	{
 		auth.POST("/register", userHandler.Register)
 		auth.POST("forgot-password", forgotPwdHandler.RequestForgotPwd)
-		auth.PATCH("forgot-pasaword", forgotPwdHandler.Reretpassword)
+		auth.PATCH("forgot-pasaword", forgotPwdHandler.Resetpassword)
 	}
 
 	// TRANSACSION
@@ -57,7 +60,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	//reviews
 	reviewProduct := r.Group("/review-product")
 	{
-		reviewProduct.GET("", reviewProductHandler.GetReviewProducts)
+		reviewProduct.GET("", reviewProductHandler.GetAllReviewProducts)
 		reviewProduct.GET("/:id", reviewProductHandler.GetReviewProductbyID)
 		reviewProduct.PATCH("/:id", reviewProductHandler.UpdateReviewProduct)
 		reviewProduct.DELETE("/:id", reviewProductHandler.DeleteReviewProduct)
