@@ -13,7 +13,7 @@ type UserHandler struct {
 	service *service.UserService
 }
 
-func NewUserhadler(s *service.UserService) *UserHandler {
+func NewUserHandler(s *service.UserService) *UserHandler {
 	return &UserHandler{
 		service: s,
 	}
@@ -37,7 +37,17 @@ func (h *UserHandler) GetUsers(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, users)
+	var responses []dto.UserResponse
+
+	for _, user := range users {
+		responses = append(responses, dto.UserResponse{
+			Id:       user.Id,
+			FullName: user.FullName,
+			Email:    user.Email,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, responses)
 }
 
 // ==================================================================== get user by id
@@ -70,12 +80,15 @@ func (h *UserHandler) GetUserById(ctx *gin.Context) {
 		})
 		return
 	}
-
-	ctx.JSON(http.StatusOK, user)
+	result := dto.UserResponse{
+		Id:       user.Id,
+		FullName: user.FullName,
+		Email:    user.Email,
+	}
+	ctx.JSON(http.StatusOK, result)
 }
 
 // =============================================================================== Update User
-
 
 // UpdateUser godoc
 // @Summary Update user
@@ -108,11 +121,11 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 		})
 		return
 	}
-	
+
 	if err := h.service.UpdateUser(ctx.Request.Context(), id, req); err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
 			Success: false,
-			Message: "User not found or update failed",
+			Message: err.Error(),
 		})
 		return
 	}
@@ -135,7 +148,7 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 // @Router /admin/users/{id} [delete]
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	idParam := ctx.Param("id")
-	
+
 	id, err := uuid.Parse(idParam)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
@@ -144,7 +157,7 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 		})
 		return
 	}
-	
+
 	if err := h.service.DeleteUser(ctx.Request.Context(), id); err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
@@ -157,6 +170,7 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 		Message: "user delete successfully",
 	})
 }
+
 // ==================================================================== register
 
 // Register godoc

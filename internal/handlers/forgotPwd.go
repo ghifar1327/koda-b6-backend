@@ -12,7 +12,7 @@ type ForgotPwdHandler struct {
 	service *service.ForgotPwdService
 }
 
-func NewForgitPwdHandler(s *service.ForgotPwdService) *ForgotPwdHandler {
+func NewForgotPwdHandler(s *service.ForgotPwdService) *ForgotPwdHandler {
 	return &ForgotPwdHandler{service: s}
 }
 
@@ -36,8 +36,8 @@ func (h *ForgotPwdHandler) RequestForgotPwd(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.service.RequestForgotPwd(ctx, req.Email); err != nil {
-		ctx.JSON(http.StatusBadRequest, dto.Response{
+	if err := h.service.RequestForgotPwd(ctx.Request.Context(), req.Email); err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success: false,
 			Message: err.Error(),
 		})
@@ -58,8 +58,8 @@ func (h *ForgotPwdHandler) RequestForgotPwd(ctx *gin.Context) {
 // @Param request body dto.ResetPwdRequest true "Reset Password Request"
 // @Success 200 {object} dto.Response
 // @Failure 400 {object} dto.Response
-// @Router /auth/reset-password [post]
-func (h *ForgotPwdHandler) Resetpassword(ctx *gin.Context) {
+// @Router /auth/reset-password [patch]
+func (h *ForgotPwdHandler) ResetPassword(ctx *gin.Context) {
 	var req dto.ResetPwdRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
@@ -68,7 +68,7 @@ func (h *ForgotPwdHandler) Resetpassword(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := h.service.ResetPassword(ctx, req); err != nil {
+	if err := h.service.ResetPassword(ctx.Request.Context(), req); err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
 			Message: err.Error(),
