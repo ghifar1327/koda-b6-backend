@@ -53,8 +53,6 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	})
 }
 
-
-
 // Login godoc
 // @Summary Login new user
 // @Description Create a new user account
@@ -86,9 +84,9 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, dto.ResponseToken{
-		Succsess: true,
-		Message:  "Login Success",
-		Token:    token,
+		Success: true,
+		Message: "Login Success",
+		Token:   token,
 	})
 }
 

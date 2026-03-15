@@ -26,6 +26,17 @@ definitions:
       stock:
         type: integer
     type: object
+  dto.CreateReviewProductRequest:
+    properties:
+      id_transaction_details:
+        type: integer
+      message:
+        type: string
+      rating:
+        type: number
+      user_id:
+        type: string
+    type: object
   dto.CreateTransactionRequest:
     properties:
       id_method:
@@ -92,7 +103,7 @@ definitions:
     properties:
       message:
         type: string
-      succsess:
+      success:
         type: boolean
       token:
         type: string
@@ -146,7 +157,7 @@ definitions:
         items:
           type: string
         type: array
-      created_at:
+      createdAt:
         type: string
       description:
         type: string
@@ -158,7 +169,7 @@ definitions:
         type: integer
       stock:
         type: integer
-      updated_at:
+      updatedAt:
         type: string
     type: object
   models.ReviewProduct:
@@ -412,106 +423,6 @@ paths:
       summary: Reset password
       tags:
       - Auth
-  /landing/recommended:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve recommended products for landing page
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Product'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.Response'
-      summary: Get recommended products
-      tags:
-      - Landing
-  /landing/recommended/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve recommended product detail by ID
-      parameters:
-      - description: Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Product'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.Response'
-      summary: Get recommended product by ID
-      tags:
-      - Landing
-  /landing/reviews:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all review products for landing page
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.ReviewProduct'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.Response'
-      summary: Get all review products
-      tags:
-      - Landing
-  /landing/reviews/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve review product by ID
-      parameters:
-      - description: Review Product ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.ReviewProduct'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.Response'
-      summary: Get review product by ID
-      tags:
-      - Landing
   /products:
     get:
       consumes:
@@ -589,7 +500,57 @@ paths:
       summary: Get product by ID
       tags:
       - Products
-  /review-products:
+  /recommended-product:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve recommended products for landing page
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get recommended products
+      tags:
+      - Landing
+  /recommended-product/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve recommended product detail by ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get recommended product by ID
+      tags:
+      - Landing
+  /review-product:
     get:
       consumes:
       - application/json
@@ -637,7 +598,7 @@ paths:
       summary: Create review product
       tags:
       - ReviewProducts
-  /review-products/{id}:
+  /review-product/{id}:
     delete:
       consumes:
       - application/json
@@ -694,6 +655,82 @@ paths:
       summary: Get review product by ID
       tags:
       - ReviewProducts
+  /review-products:
+    post:
+      consumes:
+      - application/json
+      description: Create a new review product
+      parameters:
+      - description: Review Product Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateReviewProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Create review product
+      tags:
+      - ReviewProducts
+  /reviews:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all review products for landing page
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ReviewProduct'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get all review products
+      tags:
+      - Landing
+  /reviews/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve review product by ID
+      parameters:
+      - description: Review Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ReviewProduct'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get review product by ID
+      tags:
+      - Landing
   /transactions:
     get:
       consumes:
