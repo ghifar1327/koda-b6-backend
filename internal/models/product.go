@@ -7,20 +7,20 @@ import (
 )
 
 type Product struct {
-	Id          int       `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Price       int       `json:"price"`
-	Categories  []string  `json:"categories"`
-	Stoct       int       `json:"stock"`
-	CreatedAt   time.Time `json:"created_at"`
-	UploadedAt  time.Time `json:"updated_at"`
+	Id          int       `db:"id"`
+	Name        string    `db:"name"`
+	Description string    `db:"description"`
+	Price       int       `db:"price"`
+	Categories  []string  `db:"categories"`
+	Stock       int       `db:"stock"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
 }
 
 type ReviewProduct struct {
 	Id                  int       `db:"id"`
 	UserId              uuid.UUID `db:"user_id"`
-	IdTransactionDetail int       `db:"id_transaksion_detail"`
+	IdTransactionDetail int       `db:"id_transaction_details"`
 	Rating              float64   `db:"rating"`
 	Message             string    `db:"message"`
 }
@@ -28,7 +28,7 @@ type ReviewProduct struct {
 type Reviews struct {
 	Id          int    `db:"id"`
 	Name        string `db:"name"`
-	Image       string `db:"url"`
+	Image       string `db:"images"`
 	Description string `db:"description"`
 	Price       int    `db:"price"`
 	TotalReview int    `db:"total_review"`
@@ -37,7 +37,7 @@ type Reviews struct {
 type RecommendedProduct struct {
 	Id          int     `db:"id"`
 	Name        string  `db:"name"`
-	Image       string  `db:"url"`
+	Image       string  `db:"images"`
 	Description string  `db:"description"`
 	Price       int     `db:"price"`
 	TotalReview int     `db:"total_review"`

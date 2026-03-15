@@ -28,7 +28,7 @@ func (s *ProductService) GetAllProductByID(ctx context.Context, id int) (*models
 }
 
 func (s *ProductService) CreateProduct(ctx context.Context, req dto.CreateProductRequest) error {
-	return s.repo.CreateProduct(ctx,req)
+	return s.repo.CreateProduct(ctx, req)
 }
 
 func (s *ProductService) UpdateProduct(ctx context.Context, id int, req models.Product) error {
@@ -45,15 +45,15 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id int, req models.P
 		product.Description = req.Description
 	}
 
-	if req.Stoct <= 0 {
+	if req.Stock <= 0 {
 		return errors.New("invalid Price")
 	}
 	product.Price = req.Price
 
-	if req.Stoct <= 0 {
+	if req.Stock <= 0 {
 		return errors.New("invalid stock")
 	}
-	product.Stoct = req.Stoct
+	product.Stock = req.Stock
 
 	return s.repo.UpdateProduct(ctx, id, *product)
 }
