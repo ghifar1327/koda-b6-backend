@@ -21,13 +21,23 @@ type Container struct {
 	fpService *service.ForgotPwdService
 	fpHandler *handlers.ForgotPwdHandler
 
+	// LANDING
+	landingRepo    *repository.LandingRepository
+	landingService *service.LandingService
+	landingHandler *handlers.LandingHandler
+
+	//TRANSACTION
+	transactionRepo    *repository.TransactionRepository
+	transactionService *service.TransactionService
+	transactionHandler *handlers.TransactionHandler
+
 	// PRODUCT
 	productRepo    *repository.ProductRepository
 	productService *service.ProductService
 	productHandler *handlers.ProductHandler
 
 	// REVIEW PRODUCT
-	reviewProductRepo     *repository.ReviewProductRepository
+	reviewProductRepo    *repository.ReviewProductRepository
 	reviewProductSevice  *service.ReviewProductService
 	reviewProductHandler *handlers.ReviewProductHandler
 }
@@ -47,17 +57,27 @@ func (c *Container) initDependencies() {
 	// USER
 	c.userRepo = repository.NewUserrepository(c.db)
 	c.userService = service.NewUserService(c.userRepo)
-	c.userHandler = handlers.NewUserhadler(c.userService)
+	c.userHandler = handlers.NewUserHandler(c.userService)
+
+	//FORGOT PASSWORD
+	c.fpRepo = repository.NewForgotPWDRepository(c.db)
+	c.fpService = service.NewForgotPwdService(c.userRepo, c.fpRepo)
+	c.fpHandler = handlers.NewForgotPwdHandler(c.fpService)
+
+	//LANDING
+	c.landingRepo = repository.NewLandingRepository(c.db)
+	c.landingService = service.NewLandingService(c.landingRepo)
+	c.landingHandler = handlers.NewLandingHandler(c.landingService)
+
+	// TRAMSACTION
+	c.transactionRepo = repository.NewTransactionRepository(c.db)
+	c.transactionService = service.NewTransactionService(c.transactionRepo)
+	c.transactionHandler = handlers.NewTransactionHandler(c.transactionService)
 
 	//PRODUCT
 	c.productRepo = repository.NewProductRepository(c.db)
 	c.productService = service.NewProductService(c.productRepo)
 	c.productHandler = handlers.NewProductHandler(c.productService)
-
-	//FORGOT PASSWORD
-	c.fpRepo = repository.NewForgotPWDRepository(c.db)
-	c.fpService = service.NewForgotPwdService(c.userRepo, c.fpRepo)
-	c.fpHandler = handlers.NewForgitPwdHandler(c.fpService)
 
 	// REVIEW PRODUCT
 	c.reviewProductRepo = repository.NewReviewProductRepository(c.db)
@@ -68,15 +88,19 @@ func (c *Container) initDependencies() {
 func (c *Container) UserHandler() *handlers.UserHandler {
 	return c.userHandler
 }
+func (c *Container) ForgotPwdHandle() *handlers.ForgotPwdHandler {
+	return c.fpHandler
+}
+func (c *Container) LandingHandler() *handlers.LandingHandler {
+	return c.landingHandler
+}
 
 func (c *Container) ProductHandler() *handlers.ProductHandler {
 	return c.productHandler
 }
-
-func (c *Container) ForgotPwdHandle() *handlers.ForgotPwdHandler {
-	return c.fpHandler
+func (c *Container) TransactionHandler() *handlers.TransactionHandler {
+	return c.transactionHandler
 }
-
 func (c *Container) ReviewProductHandler() *handlers.ReviewProductHandler {
 	return c.reviewProductHandler
 }
