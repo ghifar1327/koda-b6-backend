@@ -7,21 +7,23 @@ import (
 
 	_ "backend/docs"
 	"backend/internal/di"
+	"backend/internal/middleware"
 )
 
 func Router(r *gin.Engine, container *di.Container) {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	r.Use(middleware.CorsMiddleware())
 	//user
 	userHandler := container.UserHandler()
-	forgotPwdHandler := container.ForgotPwdHandle()
+	AuthHandler := container.AuthHandler()
 	productHandler := container.ProductHandler()
 	landingHandler := container.LandingHandler()
 	reviewProductHandler := container.ReviewProductHandler()
 	transactionHandler := container.TransactionHandler()
 
 	admin := r.Group("/admin")
+	admin.Use(middleware.AuthMiddleware())
 	{
 		//users
 		users := admin.Group("/users")
@@ -45,9 +47,10 @@ func Router(r *gin.Engine, container *di.Container) {
 	// Auth
 	auth := r.Group("/auth")
 	{
-		auth.POST("/register", userHandler.Register)
-		auth.POST("/forgot-password", forgotPwdHandler.RequestForgotPwd)
-		auth.PATCH("/reset-password", forgotPwdHandler.ResetPassword)
+		auth.POST("/register", AuthHandler.Register)
+		auth.POST("/login", AuthHandler.Login)
+		auth.POST("/forgot-password", AuthHandler.RequestForgotPwd)
+		auth.PATCH("/reset-password", AuthHandler.ResetPassword)
 	}
 
 	// TRANSACSION

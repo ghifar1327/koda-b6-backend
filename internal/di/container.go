@@ -17,9 +17,9 @@ type Container struct {
 	userHandler *handlers.UserHandler
 
 	//FORGOT PASSWORD
-	fpRepo    *repository.ForgotPWDRepository
-	fpService *service.ForgotPwdService
-	fpHandler *handlers.ForgotPwdHandler
+	fpRepo      *repository.AuthRepository
+	fpService   *service.AuthService
+	authHandler *handlers.AuthHandler
 
 	// LANDING
 	landingRepo    *repository.LandingRepository
@@ -59,10 +59,10 @@ func (c *Container) initDependencies() {
 	c.userService = service.NewUserService(c.userRepo)
 	c.userHandler = handlers.NewUserHandler(c.userService)
 
-	//FORGOT PASSWORD
-	c.fpRepo = repository.NewForgotPWDRepository(c.db)
-	c.fpService = service.NewForgotPwdService(c.userRepo, c.fpRepo)
-	c.fpHandler = handlers.NewForgotPwdHandler(c.fpService)
+	//AUTH
+	c.fpRepo = repository.NewAuthRepository(c.db)
+	c.fpService = service.NewAuthService(c.userRepo, c.fpRepo)
+	c.authHandler = handlers.NewAuthHandler(c.fpService)
 
 	//LANDING
 	c.landingRepo = repository.NewLandingRepository(c.db)
@@ -88,8 +88,8 @@ func (c *Container) initDependencies() {
 func (c *Container) UserHandler() *handlers.UserHandler {
 	return c.userHandler
 }
-func (c *Container) ForgotPwdHandle() *handlers.ForgotPwdHandler {
-	return c.fpHandler
+func (c *Container) AuthHandler() *handlers.AuthHandler {
+	return c.authHandler
 }
 func (c *Container) LandingHandler() *handlers.LandingHandler {
 	return c.landingHandler
