@@ -20,12 +20,12 @@ func NewLandingRepository(db *pgx.Conn) *LandingRepository {
 func (r *LandingRepository) GetAllReviewProducs(ctx context.Context) ([]models.Reviews, error) {
 	query := `
 		SELECT 
-        p.id,
-        p.name,
-        i.url AS image,
-        p.description,
-        p.price,
-        COUNT(rp.id) AS total_review
+            p.id,
+            p.name,
+            i.url AS images,
+            p.description,
+            p.price,
+            COUNT(rp.id) AS total_review
         FROM review_product rp
         JOIN transaction_details td ON rp.id_transaction_details = td.id
         JOIN products p ON td.product_id = p.id
@@ -83,13 +83,13 @@ func (r *LandingRepository) GetReviwProductByID(ctx context.Context, id int) (*m
 func (r *LandingRepository) GetRecommendedProducts(ctx context.Context) ([]models.RecommendedProduct, error) {
 	query := `
 		SELECT 
-        p.id,
-        p.name,
-        i.url AS images,
-        p.description,
-        p.price,
-        COUNT(rp.id) AS total_review,
-        AVG(rp.rating) AS avg_rating
+            p.id,
+            p.name,
+            i.url AS images,
+            p.description,
+            p.price,
+            COUNT(rp.id) AS total_review,
+            AVG(rp.rating) AS avg_rating
   	    FROM review_product rp
   	    JOIN transaction_details td ON rp.id_transaction_details = td.id
   	    JOIN products p ON td.product_id = p.id
@@ -113,30 +113,35 @@ func (r *LandingRepository) GetRecommendedProducts(ctx context.Context) ([]model
 }
 
 func (r *LandingRepository) GetRecommendedProductByID(ctx context.Context, id int) (*models.RecommendedProduct, error) {
+
 	query := `
-		SELECT 
+	SELECT 
         p.id,
         p.name,
-        i.url AS image,
+        i.url AS images,
         p.description,
         p.price,
-        COUNT(rp.id) AS total_review,
+        COUNT(DISTINCT rp.id) AS total_review,
         AVG(rp.rating) AS avg_rating
-  	    FROM review_product rp
-  	    JOIN transaction_details td ON rp.id_transaction_details = td.id
-  	    JOIN products p ON td.product_id = p.id
-  	    LEFT JOIN product_images pi ON p.id = pi.product_id
-  	    LEFT JOIN images i ON pi.image_id = i.id
-		WHERE p.id=$1
-  	    GROUP BY p.id, p.name, i.url, p.description, p.price`
+	FROM review_product rp
+	JOIN transaction_details td ON rp.id_transaction_details = td.id
+	JOIN products p ON td.product_id = p.id
+	LEFT JOIN product_images pi ON p.id = pi.product_id
+	LEFT JOIN images i ON pi.image_id = i.id
+	WHERE p.id=$1
+	GROUP BY p.id, p.name, i.url, p.description, p.price
+	`
+
 	rows, err := r.db.Query(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	rp, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.RecommendedProduct])
 	if err != nil {
 		return nil, err
 	}
+
 	return &rp, nil
 }
