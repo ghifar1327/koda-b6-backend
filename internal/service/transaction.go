@@ -27,15 +27,8 @@ func (s *TransactionService) GetAllTransactionByID(ctx context.Context, id uuid.
 	return s.repo.GetTransactionByID(ctx, id)
 }
 
-func (s *TransactionService) CreateTransaction(ctx context.Context, req dto.CreateRransactionRequest) error {
-	newTransaction := dto.CreateRransactionRequest{
-		UserId:        req.UserId,
-		Status:        req.Status,
-		IdMethod:      req.IdMethod,
-		PaymentMethod: req.PaymentMethod,
-		IdVoucher:     req.IdVoucher,
-	}
-	return s.repo.CreateTransaction(ctx, newTransaction)
+func (s *TransactionService) CreateTransaction(ctx context.Context, req dto.CreateTransactionRequest) error {
+	return s.repo.CreateTransaction(ctx, req)
 }
 
 func (s *TransactionService) UpdateTransaction(ctx context.Context, id uuid.UUID, req models.Transaction) error {

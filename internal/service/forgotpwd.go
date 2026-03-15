@@ -7,6 +7,7 @@ import (
 	"backend/internal/utils"
 	"context"
 	"errors"
+	"fmt"
 )
 
 type ForgotPwdService struct {
@@ -31,6 +32,7 @@ func (s *ForgotPwdService) RequestForgotPwd(ctx context.Context, email string) e
 	if err != nil {
 		return err
 	}
+	fmt.Println(otp)
 	newData := models.ForgotPassword{
 		Email: user.Email,
 		Code:  otp,

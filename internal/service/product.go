@@ -1,12 +1,12 @@
 package service
 
 import (
+	"backend/internal/dto"
 	"backend/internal/models"
 	"backend/internal/repository"
 	"context"
 	"errors"
 	"strings"
-	"time"
 )
 
 type ProductService struct {
@@ -27,15 +27,8 @@ func (s *ProductService) GetAllProductByID(ctx context.Context, id int) (*models
 	return s.repo.GetProductByID(ctx, id)
 }
 
-func (s *ProductService) CreateProduct(ctx context.Context, req models.Product) error {
-	newProduct := models.Product{
-		Name:        req.Name,
-		Description: req.Description,
-		Price:       req.Price,
-		Stoct:       req.Stoct,
-		CreatedAt:   time.Now(),
-	}
-	return s.repo.CreateProduct(ctx, newProduct)
+func (s *ProductService) CreateProduct(ctx context.Context, req dto.CreateProductRequest) error {
+	return s.repo.CreateProduct(ctx,req)
 }
 
 func (s *ProductService) UpdateProduct(ctx context.Context, id int, req models.Product) error {
