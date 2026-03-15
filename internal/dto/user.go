@@ -4,19 +4,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type RegisterRequest struct {
-	FullName string `json:"full_name"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-	Address  string `json:"address"`
-	Phone    string `json:"phone"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
 type UpdateUsersRequest struct {
 	Picture  string `json:"picture"`
 	Email    string `json:"email"`
