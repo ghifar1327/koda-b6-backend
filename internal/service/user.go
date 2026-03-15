@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -42,29 +41,6 @@ func (s *UserService) ReadAllUser(ctx context.Context) ([]models.User, error) {
 }
 func (s *UserService) ReadByIdUser(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	return s.repo.GetUserByID(ctx, id)
-}
-
-func (s *UserService) Register(ctx context.Context, req dto.RegisterRequest) error {
-	if err := validateUser(req.FullName, req.Email, req.Password); err != nil {
-		return err
-	}
-	hash, err := utils.HashPassword(req.Password)
-	if err != nil {
-		return err
-	}
-
-	newUser := models.User{
-		Id:        uuid.New(),
-		Email:     req.Email,
-		Password:  hash,
-		FullName:  req.FullName,
-		RoleId:    2,
-		Address:   req.Address,
-		Phone:     req.Phone,
-		CreatedAt: time.Now(),
-	}
-
-	return s.repo.CreateUser(ctx, newUser)
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, id uuid.UUID, req dto.UpdateUsersRequest) error {
