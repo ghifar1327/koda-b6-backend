@@ -28,7 +28,7 @@ func NewLandingHandler(s *service.LandingService) *LandingHandler {
 // @Produce json
 // @Success 200 {array} models.ReviewProduct
 // @Failure 500 {object} dto.Response
-// @Router /landing/reviews [get]
+// @Router /reviews [get]
 func (h *LandingHandler) GetAllReviewProducts(ctx *gin.Context) {
 	products, err := h.service.GetAllReviewProducts(ctx.Request.Context())
 	if err != nil {
@@ -51,7 +51,7 @@ func (h *LandingHandler) GetAllReviewProducts(ctx *gin.Context) {
 // @Success 200 {object} models.ReviewProduct
 // @Failure 400 {object} dto.Response
 // @Failure 404 {object} dto.Response
-// @Router /landing/reviews/{id} [get]
+// @Router /reviews/{id} [get]
 func (h *LandingHandler) GetReviwProductByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -78,7 +78,7 @@ func (h *LandingHandler) GetReviwProductByID(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {array} models.Product
 // @Failure 500 {object} dto.Response
-// @Router /landing/recommended [get]
+// @Router /recommended-product [get]
 func (h *LandingHandler) GetRecommendedProducts(ctx *gin.Context) {
 	products, err := h.service.GetRecommendedProducts(ctx.Request.Context())
 	if err != nil {
@@ -101,7 +101,7 @@ func (h *LandingHandler) GetRecommendedProducts(ctx *gin.Context) {
 // @Success 200 {object} models.Product
 // @Failure 400 {object} dto.Response
 // @Failure 404 {object} dto.Response
-// @Router /landing/recommended/{id} [get]
+// @Router /recommended-product/{id} [get]
 func (h *LandingHandler) GetRecommendedProductByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
