@@ -7,24 +7,24 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type ForgotPWDRepository struct {
+type AuthRepository struct {
 	db *pgx.Conn
 }
 
-func NewForgotPWDRepository(db *pgx.Conn) *ForgotPWDRepository {
-	return &ForgotPWDRepository{
+func NewAuthRepository(db *pgx.Conn) *AuthRepository {
+	return &AuthRepository{
 		db: db,
 	}
 }
 
-func (r *ForgotPWDRepository) CreateForgotPWD(ctx context.Context, f models.ForgotPassword) error {
+func (r *AuthRepository) CreateForgotPWD(ctx context.Context, f models.ForgotPassword) error {
 	query := `INSERT INTO forgot_password (email, code) VALUES ($1, $2)`
 	_, err := r.db.Exec(ctx, query, f.Email, f.Code)
 
 	return err
 }
 
-func (r *ForgotPWDRepository) GetForgotPWDByEmail(ctx context.Context, email string) (*models.ForgotPassword, error) {
+func (r *AuthRepository) GetForgotPWDByEmail(ctx context.Context, email string) (*models.ForgotPassword, error) {
 	query := `
 		SELECT 
 		email,
@@ -45,7 +45,7 @@ func (r *ForgotPWDRepository) GetForgotPWDByEmail(ctx context.Context, email str
 	return &fp, nil
 }
 
-func (r *ForgotPWDRepository) DeleteForgotPWDByCode(ctx context.Context, code int) error {
+func (r *AuthRepository) DeleteForgotPWDByCode(ctx context.Context, code int) error {
 	query := `DELETE FROM forgot_password WHERE code=$1`
 	_, err := r.db.Exec(ctx, query, code)
 	return err
