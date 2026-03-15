@@ -150,7 +150,6 @@ func (r *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	query := `
 		SELECT 

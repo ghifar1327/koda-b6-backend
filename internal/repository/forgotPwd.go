@@ -18,7 +18,7 @@ func NewForgotPWDRepository(db *pgx.Conn) *ForgotPWDRepository {
 }
 
 func (r *ForgotPWDRepository) CreateForgotPWD(ctx context.Context, f models.ForgotPassword) error {
-	query := `INSERT INTO forgot_pwd (email, code) VALUES ($1, $2)`
+	query := `INSERT INTO forgot_password (email, code) VALUES ($1, $2)`
 	_, err := r.db.Exec(ctx, query, f.Email, f.Code)
 
 	return err
@@ -29,13 +29,13 @@ func (r *ForgotPWDRepository) GetForgotPWDByEmail(ctx context.Context, email str
 		SELECT 
 		email,
 		code
-		FROM forgot_pwd WHERE email=$1`
+		FROM forgot_password WHERE email=$1`
 
 	var fp models.ForgotPassword
 
 	err := r.db.QueryRow(ctx, query, email).Scan(
-		fp.Email,
-		fp.Code,
+		&fp.Email,
+		&fp.Code,
 	)
 
 	if err != nil {
@@ -46,7 +46,7 @@ func (r *ForgotPWDRepository) GetForgotPWDByEmail(ctx context.Context, email str
 }
 
 func (r *ForgotPWDRepository) DeleteForgotPWDByCode(ctx context.Context, code int) error {
-	query := `DELETE FROM forgot_pwd WHERE code=$1`
+	query := `DELETE FROM forgot_password WHERE code=$1`
 	_, err := r.db.Exec(ctx, query, code)
 	return err
 }
