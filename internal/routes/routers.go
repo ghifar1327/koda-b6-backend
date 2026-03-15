@@ -46,8 +46,8 @@ func Router(r *gin.Engine, container *di.Container) {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", userHandler.Register)
-		auth.POST("forgot-password", forgotPwdHandler.RequestForgotPwd)
-		auth.PATCH("forgot-pasaword", forgotPwdHandler.Resetpassword)
+		auth.POST("/forgot-password", forgotPwdHandler.RequestForgotPwd)
+		auth.PATCH("/reset-password", forgotPwdHandler.ResetPassword)
 	}
 
 	// TRANSACSION
