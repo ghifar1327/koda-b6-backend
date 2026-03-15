@@ -5,6 +5,5 @@ type CreateProductRequest struct {
 	Description string   `json:"description"`
 	Price       int      `json:"price"`
 	Categories  []string `json:"categories"`
-	Stoct       int      `json:"stock"`
+	Stock       int      `json:"stock"`
 }
-
