@@ -5,3 +5,6 @@ type ResetPwdRequest struct {
 	Code        int    `json:"code"`
 	NewPassword string `json:"new_password"`
 }
+type ForgotPasswordRequest struct {
+	Email string `json:"email"`
+}

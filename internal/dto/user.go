@@ -1,8 +1,6 @@
 package dto
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -20,14 +18,13 @@ type LoginRequest struct {
 }
 
 type UpdateUsersRequest struct {
-	Picture   string    `json:"picture"`
-	Email     string    `json:"email"`
-	FullName  string    `json:"full_name"`
-	Password  string    `json:"password"`
-	Address   string    `json:"address"`
-	Phone     string    `json:"phone"`
-	RoleId    int       `json:"role_id"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Picture  string `json:"picture"`
+	Email    string `json:"email"`
+	FullName string `json:"full_name"`
+	Password string `json:"password"`
+	Address  string `json:"address"`
+	Phone    string `json:"phone"`
+	RoleId   int    `json:"role_id"`
 }
 
 type AuthResponse struct {
