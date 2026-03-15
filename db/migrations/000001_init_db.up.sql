@@ -55,6 +55,12 @@ CREATE TABLE if NOT EXISTS transactions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ===================================================================================== VARIANT
+CREATE TABLE if NOT EXISTS variants (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    add_price INT DEFAULT 0
+);
 
 -- ====================================================================================== SIZES
 CREATE TABLE if NOT EXISTS sizes (
@@ -63,11 +69,13 @@ CREATE TABLE if NOT EXISTS sizes (
     add_price INT DEFAULT 0
 );
 -- ============================================================================== TRANSACTION DETAIL
-CREATE TABLE if NOT EXISTS transaction_details (
+CREATE TABLE IF NOT EXISTS transaction_details (
     id SERIAL PRIMARY KEY,
     transaction_id UUID REFERENCES transactions(id) ON DELETE CASCADE,
     product_id INT REFERENCES products(id),
-    size_id INT REFERENCES sizes(id)
+    size_id INT REFERENCES sizes(id),
+    variant_id INT REFERENCES variants(id),
+    quantity INT NOT NULL
 );
 
 -- =============================================================================== CATEGORIES
@@ -80,15 +88,6 @@ CREATE TABLE if NOT EXISTS products_categories (
     product_id INT REFERENCES products(id) ON DELETE CASCADE,
     category_id INT REFERENCES categories(id) ON DELETE CASCADE,
     PRIMARY KEY (product_id, category_id)
-);
-
-
-
--- ===================================================================================== VARIANT
-CREATE TABLE if NOT EXISTS variants (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    add_price INT DEFAULT 0
 );
 
 
