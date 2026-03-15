@@ -31,36 +31,17 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 			phone, 
 			address, 
 			created_at, 
-			updated_at 
-			FROM users`
-
+			updated_at FROM users`
 	rows, err := r.db.Query(ctx, query)
-
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var users []models.User
-	for rows.Next() {
-		var u models.User
-		err := rows.Scan(
-			&u.Id,
-			&u.FullName,
-			&u.Picture,
-			&u.Email,
-			&u.Password,
-			&u.RoleId,
-			&u.Phone,
-			&u.Address,
-			&u.CreatedAt,
-			&u.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, u)
+	users, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.User])
+	if err != nil {
+		return nil, err
 	}
+
 	return users, nil
 }
 
@@ -68,29 +49,24 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
 	query := `
 		SELECT 
-		id, 
-		picture, 
-		full_name, 
-		email, 
-		password, 
-		address, 
-		phone, 
-		role_id 
-			  FROM users WHERE id=$1`
+			id, 
+			picture, 
+			full_name, 
+			email, 
+			password, 
+			address, 
+			phone, 
+			role_id
+		FROM users 
+		WHERE id=$1
+	`
 
-	var user models.User
+	rows, err := r.db.Query(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
 
-	err := r.db.QueryRow(ctx, query, id).Scan(
-		&user.Id,
-		&user.Picture,
-		&user.FullName,
-		&user.Email,
-		&user.Password,
-		&user.Address,
-		&user.Phone,
-		&user.RoleId,
-	)
-
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
 		return nil, err
 	}

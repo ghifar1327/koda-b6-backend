@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
 	"time"
@@ -34,31 +35,17 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 			ON p.id = pc.product_id
 		JOIN categories c
 			ON pc.category_id = c.id
-		GROUP BY p.id`
-
+		GROUP BY p.id, p.name, p.description, p.price, p.stock, p.created_at, p.updated_at`
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var products []models.Product
-	for rows.Next() {
-		var p models.Product
-		err := rows.Scan(
-			&p.Id,
-			&p.Name,
-			&p.Description,
-			&p.Price,
-			&p.Categories,
-			&p.Stoct,
-			&p.CreatedAt,
-			&p.UploadedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		products = append(products, p)
+
+	products, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Product])
+	if err != nil {
+		return nil, err
 	}
+
 	return products, nil
 }
 
@@ -78,25 +65,22 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 			ON p.id = pc.product_id
 		JOIN categories c
 			ON pc.category_id = c.id
-		GROUP BY p.id WHERE id=$1`
-	var product models.Product
-	err := r.db.QueryRow(ctx, query, id).Scan(
-		&product.Id,
-		&product.Name,
-		&product.Description,
-		&product.Price,
-		&product.Categories,
-		&product.Stoct,
-		&product.CreatedAt,
-		&product.UploadedAt,
-	)
+		WHERE p.id = $1
+		GROUP BY  p.id, p.name, p.description, p.price, p.stock, p.created_at, p.updated_at`
+	rows, err := r.db.Query(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
+
+	product, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Product])
+	if err != nil {
+		return nil, err
+	}
+
 	return &product, nil
 }
 
-func (r *ProductRepository) CreateProduct(ctx context.Context, p models.Product) error {
+func (r *ProductRepository) CreateProduct(ctx context.Context, p dto.CreateProductRequest) error {
 	query := `INSERT INTO 
 		products (
 			name,
@@ -108,8 +92,8 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, p models.Product)
 		p.Name,
 		p.Description,
 		p.Price,
-		p.Stoct,
-		p.CreatedAt,
+		p.Stock,
+		time.Now(),
 	)
 
 	return err
@@ -129,7 +113,7 @@ func (r *ProductRepository) UpdateProduct(ctx context.Context, id int, p models.
 		p.Name,
 		p.Description,
 		p.Price,
-		p.Stoct,
+		p.Stock,
 		time.Now(),
 		id)
 	return err

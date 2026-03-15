@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
 
@@ -17,99 +18,108 @@ func NewReviewProductRepository(db *pgx.Conn) *ReviewProductRepository {
 	}
 }
 
+// ======================================================================================================== GET ALL REVIEW PRODUCTS
+
 func (r *ReviewProductRepository) GetAllReviewProducts(ctx context.Context) ([]models.ReviewProduct, error) {
 	query := `
 		SELECT 
-		id, 
-		user_id,
-		id_transaction_details,
-		rating,
-		message FROM review_product`
+			id, 
+			user_id,
+			id_transaction_details,
+			rating,
+			message 
+		FROM review_product
+	`
 
 	rows, err := r.db.Query(ctx, query)
-
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	var ReviewProducts []models.ReviewProduct
-	for rows.Next() {
-		var t models.ReviewProduct
-		err := rows.Scan(
-			t.Id,
-			t.UserId,
-			t.IdTransactionDetail,
-			t.Rating,
-			t.Message,
-		)
-		if err != nil {
-			return nil, err
-		}
-		ReviewProducts = append(ReviewProducts, t)
+	reviewProducts, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.ReviewProduct])
+	if err != nil {
+		return nil, err
 	}
-	return ReviewProducts, nil
+
+	return reviewProducts, nil
 }
 
-// ==================================================================================================================================================== Get ReviewProduct By ID
+// ======================================================================================================== GET REVIEW PRODUCT BY ID
+
 func (r *ReviewProductRepository) GetReviewProductByID(ctx context.Context, id int) (*models.ReviewProduct, error) {
 	query := `
 		SELECT 
-		id, 
-		user_id,
-		id_transaction_details,
-		rating
-		message
-		FROM review_product WHERE id=$1`
+			id, 
+			user_id,
+			id_transaction_details,
+			rating,
+			message
+		FROM review_product
+		WHERE id=$1
+	`
 
-	var ReviewProduct models.ReviewProduct
-
-	err := r.db.QueryRow(ctx, query, id).Scan(
-		&ReviewProduct.Id,
-		&ReviewProduct.UserId,
-		&ReviewProduct.IdTransactionDetail,
-		&ReviewProduct.Rating,
-		&ReviewProduct.Message,
-	)
-
+	rows, err := r.db.Query(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ReviewProduct, nil
+	reviewProduct, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.ReviewProduct])
+	if err != nil {
+		return nil, err
+	}
+
+	return &reviewProduct, nil
 }
 
-// ====================================================================================================================================================  Create ReviewProduct
+// ======================================================================================================== CREATE REVIEW PRODUCT
 
-func (r *ReviewProductRepository) CreateReviewProduct(ctx context.Context, t models.ReviewProduct) error {
-	query := `INSERT INTO review_product (
-		id, 
-		user_id,
-		id_transaction_details,
-		rating,
-		message) VALUES ($1, $2, $3, $4, $5)`
+func (r *ReviewProductRepository) CreateReviewProduct(ctx context.Context, rp dto.CreateReviewProductRequest) error {
+	query := `
+		INSERT INTO review_product (
+			user_id,
+			id_transaction_details,
+			rating,
+			message
+		) 
+		VALUES ($1, $2, $3, $4)
+	`
+
 	_, err := r.db.Exec(ctx, query,
-		t.Id,
-		t.UserId,
-		t.IdTransactionDetail,
-		t.Rating,
-		t.Message)
+		rp.UserId,
+		rp.IdTransactionDetail,
+		rp.Rating,
+		rp.Message,
+	)
 
 	return err
 }
 
-// ==================================================================================================================================================== Update ReviewProduct
+// ======================================================================================================== UPDATE REVIEW PRODUCT
 
 func (r *ReviewProductRepository) UpdateReviewProduct(ctx context.Context, id int, t models.ReviewProduct) error {
 	query := `
-	    UPDATE review_product SET rating=$1, message=$2  WHERE id=$3`
-	_, err := r.db.Exec(ctx, query, t, t.Rating, t.Message, id)
+		UPDATE review_product 
+		SET rating=$1, message=$2
+		WHERE id=$3
+	`
+
+	_, err := r.db.Exec(ctx, query,
+		t.Rating,
+		t.Message,
+		id,
+	)
+
 	return err
 }
 
-// ======================================================================================================== DELETE ReviewProduct
+// ======================================================================================================== DELETE REVIEW PRODUCT
+
 func (r *ReviewProductRepository) DeleteReviewProduct(ctx context.Context, id int) error {
-	query := `DELETE FROM review_product WHERE id=$1`
+	query := `
+		DELETE FROM review_product 
+		WHERE id=$1
+	`
+
 	_, err := r.db.Exec(ctx, query, id)
 	return err
 }
