@@ -26,14 +26,8 @@ func (s *ReviewProductService) GetAllReviewProductByID(ctx context.Context, id i
 	return s.repo.GetReviewProductByID(ctx, id)
 }
 
-func (s *ReviewProductService) CreateReviewProduct(ctx context.Context, req models.ReviewProduct) error {
-	newReviewProduct := models.ReviewProduct{
-		Id:                  req.Id,
-		UserId:              req.UserId,
-		IdTransactionDetail: req.IdTransactionDetail,
-		Rating:              req.Rating,
-	}
-	return s.repo.CreateReviewProduct(ctx, newReviewProduct)
+func (s *ReviewProductService) CreateReviewProduct(ctx context.Context, req dto.CreateReviewProductRequest) error {
+	return s.repo.CreateReviewProduct(ctx, req)
 }
 
 func (s *ReviewProductService) UpdateReviewProduct(ctx context.Context, id int, req dto.UpdateReviewProductRequest) error {
