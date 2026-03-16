@@ -23,7 +23,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	transactionHandler := container.TransactionHandler()
 
 	admin := r.Group("/admin")
-	admin.Use(middleware.AuthMiddleware())
+	// admin.Use(middleware.AuthMiddleware())
 	{
 		//users
 		users := admin.Group("/users")
@@ -63,6 +63,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	//reviews
 	reviewProduct := r.Group("/review-product")
 	{
+		reviewProduct.POST("", reviewProductHandler.CreateReviewProduct)
 		reviewProduct.GET("", reviewProductHandler.GetAllReviewProducts)
 		reviewProduct.GET("/:id", reviewProductHandler.GetReviewProductbyID)
 		reviewProduct.PATCH("/:id", reviewProductHandler.UpdateReviewProduct)
