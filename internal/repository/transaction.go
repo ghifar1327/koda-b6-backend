@@ -4,6 +4,7 @@ import (
 	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -201,10 +202,18 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 
 	return &trx, nil
 }
+
 // ====================================================================================================================================================  Create Transaction
 
-func (r *TransactionRepository) CreateTransaction(ctx context.Context, t dto.CreateRransactionRequest) error {
-	query := `INSERT INTO Transactions (
+func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.CreateTransactionRequest) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	IdTransaction := uuid.New()
+
+	query := `INSERT INTO transactions (
 		id, 
 		user_id,
 		status,
@@ -212,16 +221,57 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, t dto.Cre
 		payment_method,
 		id_voucher,
 		created_at) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := r.db.Exec(ctx, query,
-		uuid.New(),
-		t.UserId,
-		t.Status,
-		t.IdMethod,
-		t.PaymentMethod,
-		t.IdVoucher,
-		time.Now())
+	_, err = tx.Exec(ctx, query,
+		IdTransaction,
+		req.UserId,
+		"pending",
+		req.IdMethod,
+		req.PaymentMethod,
+		req.IdVoucher,
+		time.Now(),
+	)
+	if err != nil {
+		return err
+	}
 
-	return err
+	for _, item := range req.Items {
+		queryDetail := `INSERT INTO transaction_details(
+		transaction_id,
+		product_id,
+		size_id,
+		variant_id,
+		quantity)`
+
+		_, err = tx.Exec(ctx, queryDetail,
+			IdTransaction,
+			item.ProductId,
+			item.SizeId,
+			item.VariantId,
+			item.Quantity,
+		)
+		if err != nil {
+			return err
+		}
+
+		updateStock := `
+		UPDATE products
+		SET stoct - $1
+		WHERE id = &2 AND stock >= $1
+		`
+		result, err := tx.Exec(ctx, updateStock,
+			item.Quantity,
+			item.ProductId,
+		)
+
+		if err != nil {
+			return err
+		}
+		if result.RowsAffected() == 0 {
+			return errors.New("Stock not enough")
+		}
+	}
+
+	return tx.Commit(ctx)
 }
 
 // ==================================================================================================================================================== Update Transaction
