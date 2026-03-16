@@ -1,22 +1,20 @@
 FROM golang:1.25.0-alpine AS builder
 
-WORKDIR /workspace
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
 
 COPY . .
 
-RUN go mod tidy
-
-RUN go build -o backend cmd/main.go
-
-RUN chmod +x backend
-
+RUN go build -o backend ./cmd
 
 FROM alpine:latest
 
 WORKDIR /app
 
-COPY --from=builder /workspace/backend /app
+COPY --from=builder /app/backend .
 
 EXPOSE 8888
 
-ENTRYPOINT [ "/app/backend" ]
+CMD ["./backend"]
