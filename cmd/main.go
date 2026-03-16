@@ -4,13 +4,13 @@ import (
 	"backend/internal/di"
 	"backend/internal/routes"
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 )
-
 
 // @title Coffee Shop API
 // @version 1.0
@@ -32,5 +32,5 @@ func main() {
 
 	routes.Router(r, container)
 
-	r.Run(":8888")
+	r.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }
