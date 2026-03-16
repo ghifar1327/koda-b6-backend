@@ -35,3 +35,15 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+      - name: "[SERVER] pull image from ghcr.io"
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd server-ghifar
+            docker compose pull
+            docker run --rm --network=server-ghifar_default migrate/migrate:latest -source github://ghifar:${{secrets.GITHUB_TOKEN}}@ghifar/koda-b6-db/migration -database postgresql://postgres:1@pg:5432/postgres?sslmode=disable up
+            docker compose up backend -d
