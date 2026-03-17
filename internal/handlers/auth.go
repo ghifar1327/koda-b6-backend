@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type AuthHandler struct {
@@ -41,9 +42,19 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 
 	err := h.service.Register(ctx, req)
 	if err != nil {
+
+		if pgErr, ok := err.(*pgconn.PgError); ok {
+			if pgErr.Code == "23505" {
+				ctx.JSON(400, dto.Response{
+					Success: false,
+					Message: "Email already registered",
+				})
+				return
+			}
+		}
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
-			Message: err.Error(),
+			Message: "Internal server error",
 		})
 		return
 	}
@@ -83,6 +94,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		})
 		return
 	}
+	
 	ctx.JSON(http.StatusOK, dto.ResponseToken{
 		Success: true,
 		Message: "Login Success",
