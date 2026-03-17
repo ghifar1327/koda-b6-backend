@@ -14,6 +14,12 @@ func Router(r *gin.Engine, container *di.Container) {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Use(middleware.CorsMiddleware())
+
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{
+			"succes": "wellcome to backend",
+		})
+	})
 	//user
 	userHandler := container.UserHandler()
 	AuthHandler := container.AuthHandler()
@@ -71,7 +77,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	}
 
 	// Landing
-	landing := r.Group("/")
+	landing := r.Group("landeing")
 	{
 		landing.GET("/reviews", landingHandler.GetAllReviewProducts)
 		landing.GET("/reviews/:id", landingHandler.GetRecommendedProductByID)
