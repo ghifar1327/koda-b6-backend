@@ -77,7 +77,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	}
 
 	// Landing
-	landing := r.Group("landeing")
+	landing := r.Group("landing")
 	{
 		landing.GET("/reviews", landingHandler.GetAllReviewProducts)
 		landing.GET("/reviews/:id", landingHandler.GetRecommendedProductByID)
