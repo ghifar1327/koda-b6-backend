@@ -45,5 +45,5 @@ jobs:
           script: |
             cd server-ghifar
             docker compose pull 
-            docker run --rm --network=server-ghifar_default migrate/migrate:latest -source github://ghifar1327:${{secrets.GITHUB_TOKEN}}@ghifar1327/koda-b6-backend/db/migrations -database postgres://postgres:1@pg:5432/postgres?sslmode=disable up
+            docker run --rm --network=server-ghifar_webapps migrate/migrate:latest -source github://ghifar1327:${{secrets.GITHUB_TOKEN}}@ghifar1327/koda-b6-backend/db/migrations -database postgres://postgres:1@pg:5432/postgres?sslmode=disable up
             docker compose up backend -d
