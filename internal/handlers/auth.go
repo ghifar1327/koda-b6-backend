@@ -84,8 +84,14 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	// token := h.service.Login(ctx.Request.Context(),req )
-
+	user, err := h.service.GetUserBYEmail(ctx.Request.Context(), req.Email)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
 	token, err := h.service.Login(ctx.Request.Context(), req)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, dto.Response{
@@ -94,11 +100,17 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		})
 		return
 	}
-	
 	ctx.JSON(http.StatusOK, dto.ResponseToken{
 		Success: true,
 		Message: "Login Success",
 		Token:   token,
+		User: dto.UserResponse{
+			Id:       user.Id,
+			Picture:  user.Picture.String,
+			Email:    user.Email,
+			FullName: user.FullName,
+			RoleId:   user.RoleId,
+		},
 	})
 }
 
