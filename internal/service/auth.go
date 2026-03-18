@@ -113,3 +113,6 @@ func (s *AuthService) ResetPassword(ctx context.Context, req dto.ResetPwdRequest
 	}
 	return s.fgRepo.DeleteForgotPWDByCode(ctx, req.Code)
 }
+func (s *AuthService) GetUserBYEmail(ctx context.Context, email string) (*models.User , error){
+	return  s.userRepo.GetUserByEmail(ctx, email)
+}
