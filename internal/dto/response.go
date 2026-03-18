@@ -4,16 +4,19 @@ import "github.com/google/uuid"
 
 type Response struct {
 	Success bool   `json:"success"`
-	Message string `jason:"message"`
+	Message string `json:"message"`
 }
 
 type UserResponse struct {
 	Id       uuid.UUID `json:"id"`
-	FullName string    `json:"name"`
+	Picture  string    `json:"picture"`
+	FullName string    `json:"full_name"`
 	Email    string    `json:"email"`
+	RoleId   int       `json:"role_id"`
 }
 type ResponseToken struct {
-	Success bool   `json:"success"`
-	Message string `jason:"message"`
-	Token   string `json:"token"`
+	Success bool         `json:"success"`
+	Message string       `jason:"message"`
+	Token   string       `json:"token"`
+	User    UserResponse `json:"user"`
 }
