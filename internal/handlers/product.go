@@ -19,7 +19,6 @@ func NewProductHandler(s *service.ProductService) *ProductHandler {
 	}
 }
 
-
 // GetProducts godoc
 // @Summary Get all products
 // @Description Retrieve all products from database
@@ -42,8 +41,6 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context) {
 	})
 }
 
-
-
 // GetProductByID godoc
 // @Summary Get product by ID
 // @Description Retrieve a single product by its ID
@@ -59,23 +56,20 @@ func (h *ProductHandler) GetProductbyID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success: true,
+			Success: false,
 			Message: "Invalid ID",
 		})
 	}
 	product, err := h.service.GetAllProductByID(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
-			Success: true,
+			Success: false,
 			Message: "user not found",
 		})
 		return
 	}
 	ctx.JSON(http.StatusOK, product)
 }
-
-
-
 
 // CreateProduct godoc
 // @Summary Create new product
@@ -108,5 +102,43 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, dto.Response{
 		Success: true,
 		Message: "Create product successfully",
+	})
+}
+
+
+// GetVariantByIdProduct godoc
+// @Summary Get variants by product ID
+// @Description Get list of variants based on product ID
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} dto.ResponseWrap{results=[]models.Variant}
+// @Failure 400 {object} dto.Response
+// @Failure 500 {object} dto.Response
+// @Router /products/{id}/variants [get]
+func (h *ProductHandler) GetVariantByIdProduct(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid ID",
+		})
+		return
+	}
+
+	variants, err := h.service.GetVariantsByIdProduct(ctx.Request.Context(), id)
+	if err != nil {
+		ctx.JSON(500, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, dto.ResponseWrap{
+		Success: false,
+		Message: "list of variant",
+		Results: variants,
 	})
 }
