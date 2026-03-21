@@ -174,8 +174,8 @@ func (r *ProductRepository) GetSizesByIdProduct(ctx context.Context, id int) ([]
 		s.name,
 		s.add_price
 	FROM product_sizes ps
-	JOIN sizes s ON ps.product_id = s.id
-	WHERE pv.product_id = $1`
+	JOIN sizes s ON ps.size_id = s.id
+	WHERE ps.product_id = $1`
 
 	rows, err := r.db.Query(ctx, query, id)
 	if err != nil {
