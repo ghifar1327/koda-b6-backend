@@ -66,3 +66,7 @@ func (s *ProductService) DeleteProduct(ctx context.Context, id int) error {
 func (s *ProductService) GetVariantsByIdProduct(ctx context.Context, id int) ([]models.Variant, error){
 	return s.repo.GetVariantsByIdProduct(ctx, id)
 }
+
+func (s *ProductService) GetSizesByIdProduct(ctx context.Context, id int)([]models.Size, error){
+	return s.repo.GetSizesByIdProduct(ctx, id)
+}
