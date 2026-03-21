@@ -129,16 +129,66 @@ func (h *ProductHandler) GetVariantByIdProduct(ctx *gin.Context) {
 
 	variants, err := h.service.GetVariantsByIdProduct(ctx.Request.Context(), id)
 	if err != nil {
-		ctx.JSON(500, dto.Response{
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success: false,
 			Message: err.Error(),
 		})
 		return
 	}
 
-	ctx.JSON(200, dto.ResponseWrap{
-		Success: false,
-		Message: "list of variant",
+	message := "List of variants"
+	if len(variants) == 0 {
+		message = "No variants found"
+	}
+
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: message,
 		Results: variants,
+	})
+}
+
+
+// GetSizeByIdProduct godoc
+// @Summary Get Sizes by product ID
+// @Description Get list of Sizes based on product ID
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path int true "Product ID"
+// @Success 200 {object} dto.ResponseWrap{results=[]models.Size}
+// @Failure 400 {object} dto.Response
+// @Failure 500 {object} dto.Response
+// @Router /products/{id}/sizes [get]
+func (h *ProductHandler) GetSizesByIdProduct(ctx *gin.Context){
+	id , err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.ResponseWrap{
+			Success: false,
+			Message: "invalid ID",
+			Results: nil,
+		})		
+		return
+	}
+
+	sizes , err := h.service.GetSizesByIdProduct(ctx.Request.Context(), id)
+	if err !=nil {
+		ctx.JSON(500, dto.ResponseWrap{
+			Success: false,
+			Message: err.Error(),
+			Results: nil,
+		})
+		return
+	}
+	message := "list of sizes"
+
+	if len(sizes) == 0{
+		message = "No variants found"
+	}
+
+	ctx.JSON(200, dto.ResponseWrap{
+		Success: true,
+		Message: message,
+		Results: sizes,
 	})
 }
