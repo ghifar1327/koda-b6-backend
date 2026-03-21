@@ -446,6 +446,124 @@ const docTemplate = `{
                 }
             }
         },
+        "/products/{id}/sizes": {
+            "get": {
+                "description": "Get list of Sizes based on product ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get Sizes by product ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.ResponseWrap"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Size"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{id}/variants": {
+            "get": {
+                "description": "Get list of variants based on product ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get variants by product ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.ResponseWrap"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Variant"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/recommended-product": {
             "get": {
                 "description": "Retrieve recommended products for landing page",
@@ -1079,6 +1197,21 @@ const docTemplate = `{
                 },
                 "token": {
                     "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/dto.UserResponse"
+                }
+            }
+        },
+        "dto.ResponseWrap": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "results": {},
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1114,11 +1247,17 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
+                "full_name": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
-                "name": {
+                "picture": {
                     "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1157,7 +1296,7 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "description": {
@@ -1166,16 +1305,22 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "image": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "price": {
                     "type": "integer"
                 },
+                "rating": {
+                    "type": "number"
+                },
                 "stock": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1186,7 +1331,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "idTransactionDetail": {
+                "id_transaction_details": {
                     "type": "integer"
                 },
                 "message": {
@@ -1195,7 +1340,21 @@ const docTemplate = `{
                 "rating": {
                     "type": "number"
                 },
-                "userId": {
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Size": {
+            "type": "object",
+            "properties": {
+                "add_price": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1235,6 +1394,20 @@ const docTemplate = `{
                 },
                 "total_transaction": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.Variant": {
+            "type": "object",
+            "properties": {
+                "add_price": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }

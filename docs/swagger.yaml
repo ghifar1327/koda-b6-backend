@@ -107,6 +107,16 @@ definitions:
         type: boolean
       token:
         type: string
+      user:
+        $ref: '#/definitions/dto.UserResponse'
+    type: object
+  dto.ResponseWrap:
+    properties:
+      message:
+        type: string
+      results: {}
+      success:
+        type: boolean
     type: object
   dto.UpdateUsersRequest:
     properties:
@@ -129,10 +139,14 @@ definitions:
     properties:
       email:
         type: string
+      full_name:
+        type: string
       id:
         type: string
-      name:
+      picture:
         type: string
+      role_id:
+        type: integer
     type: object
   models.ItemDetail:
     properties:
@@ -157,32 +171,45 @@ definitions:
         items:
           type: string
         type: array
-      createdAt:
+      created_at:
         type: string
       description:
         type: string
       id:
         type: integer
+      image:
+        type: string
       name:
         type: string
       price:
         type: integer
+      rating:
+        type: number
       stock:
         type: integer
-      updatedAt:
+      updated_at:
         type: string
     type: object
   models.ReviewProduct:
     properties:
       id:
         type: integer
-      idTransactionDetail:
+      id_transaction_details:
         type: integer
       message:
         type: string
       rating:
         type: number
-      userId:
+      user_id:
+        type: string
+    type: object
+  models.Size:
+    properties:
+      add_price:
+        type: integer
+      id:
+        type: integer
+      name:
         type: string
     type: object
   models.Transaction:
@@ -209,6 +236,15 @@ definitions:
         type: string
       total_transaction:
         type: integer
+    type: object
+  models.Variant:
+    properties:
+      add_price:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
     type: object
 host: localhost:8888
 info:
@@ -498,6 +534,78 @@ paths:
           schema:
             $ref: '#/definitions/dto.Response'
       summary: Get product by ID
+      tags:
+      - Products
+  /products/{id}/sizes:
+    get:
+      consumes:
+      - application/json
+      description: Get list of Sizes based on product ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.ResponseWrap'
+            - properties:
+                results:
+                  items:
+                    $ref: '#/definitions/models.Size'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get Sizes by product ID
+      tags:
+      - Products
+  /products/{id}/variants:
+    get:
+      consumes:
+      - application/json
+      description: Get list of variants based on product ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.ResponseWrap'
+            - properties:
+                results:
+                  items:
+                    $ref: '#/definitions/models.Variant'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get variants by product ID
       tags:
       - Products
   /recommended-product:
