@@ -168,3 +168,23 @@ func (r *ProductRepository) GetVariantsByIdProduct(ctx context.Context, id int) 
 	}
 	return variants, nil
 }
+func (r *ProductRepository) GetSizesByIdProduct(ctx context.Context, id int) ([]models.Size, error) {
+	query := `SELECT
+		s.id,
+		s.name,
+		s.add_price
+	FROM product_sizes ps
+	JOIN sizes s ON ps.product_id = s.id
+	WHERE pv.product_id = $1`
+
+	rows, err := r.db.Query(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	sizes, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Size])
+	if err != nil {
+		return nil, err
+	}
+	return sizes, nil
+}
