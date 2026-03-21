@@ -20,3 +20,9 @@ type ResponseToken struct {
 	Token   string       `json:"token"`
 	User    UserResponse `json:"user"`
 }
+
+type ResponseWrap struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Results  any    `json:"results"`
+}
