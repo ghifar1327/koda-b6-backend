@@ -23,7 +23,7 @@ func (s *ProductService) GetAllProducts(ctx context.Context) ([]models.Product, 
 	return s.repo.GetAllProducts(ctx)
 }
 
-func (s *ProductService) GetAllProductByID(ctx context.Context, id int) (*models.Product, error) {
+func (s *ProductService) GetProductByID(ctx context.Context, id int) (*models.Product, error) {
 	return s.repo.GetProductByID(ctx, id)
 }
 
@@ -62,11 +62,10 @@ func (s *ProductService) DeleteProduct(ctx context.Context, id int) error {
 	return s.repo.DeleteProduct(ctx, id)
 }
 
-
-func (s *ProductService) GetVariantsByIdProduct(ctx context.Context, id int) ([]models.Variant, error){
+func (s *ProductService) GetVariantsByIdProduct(ctx context.Context, id int) ([]models.Variant, error) {
 	return s.repo.GetVariantsByIdProduct(ctx, id)
 }
 
-func (s *ProductService) GetSizesByIdProduct(ctx context.Context, id int)([]models.Size, error){
+func (s *ProductService) GetSizesByIdProduct(ctx context.Context, id int) ([]models.Size, error) {
 	return s.repo.GetSizesByIdProduct(ctx, id)
 }

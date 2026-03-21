@@ -60,15 +60,19 @@ func (h *ProductHandler) GetProductbyID(ctx *gin.Context) {
 			Message: "Invalid ID",
 		})
 	}
-	product, err := h.service.GetAllProductByID(ctx.Request.Context(), id)
+	product, err := h.service.GetProductByID(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
 			Success: false,
-			Message: "user not found",
+			Message: "product not found",
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, product)
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "Detail of Product",
+		Results: product,
+	})
 }
 
 // CreateProduct godoc
@@ -104,7 +108,6 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		Message: "Create product successfully",
 	})
 }
-
 
 // GetVariantByIdProduct godoc
 // @Summary Get variants by product ID
@@ -148,7 +151,6 @@ func (h *ProductHandler) GetVariantByIdProduct(ctx *gin.Context) {
 	})
 }
 
-
 // GetSizeByIdProduct godoc
 // @Summary Get Sizes by product ID
 // @Description Get list of Sizes based on product ID
@@ -160,19 +162,19 @@ func (h *ProductHandler) GetVariantByIdProduct(ctx *gin.Context) {
 // @Failure 400 {object} dto.Response
 // @Failure 500 {object} dto.Response
 // @Router /products/{id}/sizes [get]
-func (h *ProductHandler) GetSizesByIdProduct(ctx *gin.Context){
-	id , err := strconv.Atoi(ctx.Param("id"))
+func (h *ProductHandler) GetSizesByIdProduct(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.ResponseWrap{
 			Success: false,
 			Message: "invalid ID",
 			Results: nil,
-		})		
+		})
 		return
 	}
 
-	sizes , err := h.service.GetSizesByIdProduct(ctx.Request.Context(), id)
-	if err !=nil {
+	sizes, err := h.service.GetSizesByIdProduct(ctx.Request.Context(), id)
+	if err != nil {
 		ctx.JSON(500, dto.ResponseWrap{
 			Success: false,
 			Message: err.Error(),
@@ -182,7 +184,7 @@ func (h *ProductHandler) GetSizesByIdProduct(ctx *gin.Context){
 	}
 	message := "list of sizes"
 
-	if len(sizes) == 0{
+	if len(sizes) == 0 {
 		message = "No variants found"
 	}
 
