@@ -22,20 +22,30 @@ func NewProductRepository(db *pgx.Conn) *ProductRepository {
 func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Product, error) {
 	query := `
 		SELECT
-			p.id,
-			p.name,
-			p.description,
-			p.price,
-			ARRAY_AGG(c.name) AS categories,
-			p.stock,
-			p.created_at,
-			p.updated_at
+		  p.id,
+		  MIN(i.url) AS image,
+		  p.name,
+		  p.description,
+		  p.price,
+		  ARRAY_AGG(DISTINCT c.name) AS categories,
+		  COALESCE(AVG(rp.rating), 0) AS rating,
+		  p.stock,
+		  p.created_at,
+		  p.updated_at
 		FROM products p
-		JOIN products_categories pc
+		LEFT JOIN product_images pi 
+			ON p.id = pi.product_id
+		LEFT JOIN images i 
+			ON pi.image_id = i.id
+		LEFT JOIN products_categories pc 
 			ON p.id = pc.product_id
-		JOIN categories c
+		LEFT JOIN categories c 
 			ON pc.category_id = c.id
-		GROUP BY p.id, p.name, p.description, p.price, p.stock, p.created_at, p.updated_at`
+		LEFT JOIN transaction_details td 
+			ON p.id = td.product_id
+		LEFT JOIN review_product rp 
+			ON td.id = rp.id_transaction_details
+        GROUP BY p.id;`
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
@@ -52,21 +62,31 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models.Product, error) {
 	query := `
 		SELECT
-			p.id,
-			p.name,
-			p.description,
-			p.price,
-			ARRAY_AGG(c.name) AS categories,
-			p.stock,
-			p.created_at,
-			p.updated_at
+		  p.id,
+		  MIN(i.url) AS image,
+		  p.name,
+		  p.description,
+		  p.price,
+		  ARRAY_AGG(DISTINCT c.name) AS categories,
+		  COALESCE(AVG(rp.rating), 0) AS rating,
+		  p.stock,
+		  p.created_at,
+		  p.updated_at
 		FROM products p
-		JOIN products_categories pc
+		LEFT JOIN product_images pi 
+			ON p.id = pi.product_id
+		LEFT JOIN images i 
+			ON pi.image_id = i.id
+		LEFT JOIN products_categories pc 
 			ON p.id = pc.product_id
-		JOIN categories c
+		LEFT JOIN categories c 
 			ON pc.category_id = c.id
+		LEFT JOIN transaction_details td 
+			ON p.id = td.product_id
+		LEFT JOIN review_product rp 
+			ON td.id = rp.id_transaction_details
 		WHERE p.id = $1
-		GROUP BY  p.id, p.name, p.description, p.price, p.stock, p.created_at, p.updated_at`
+		GROUP BY  p.id;`
 	rows, err := r.db.Query(ctx, query, id)
 	if err != nil {
 		return nil, err
