@@ -61,3 +61,8 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id int, req models.P
 func (s *ProductService) DeleteProduct(ctx context.Context, id int) error {
 	return s.repo.DeleteProduct(ctx, id)
 }
+
+
+func (s *ProductService) GetVariantsByIdProduct(ctx context.Context, id int) ([]models.Variant, error){
+	return s.repo.GetVariantsByIdProduct(ctx, id)
+}
