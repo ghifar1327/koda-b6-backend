@@ -40,16 +40,18 @@ func Router(r *gin.Engine, container *di.Container) {
 			users.DELETE("/:id", userHandler.DeleteUser)
 		}
 		//PRODUCT
-		product := admin.Group("/products")
-		{
-			product.POST("", productHandler.CreateProduct)
-			product.GET("", productHandler.GetProducts)
-			product.GET("/:id", productHandler.GetProductbyID)
-		}
-
+		
 	}
 	// =========================================================== FEATURE
-
+	
+	product := r.Group("/products")
+	{
+		product.POST("", productHandler.CreateProduct)
+		product.GET("", productHandler.GetProducts)
+		product.GET("/:id", productHandler.GetProductbyID)
+		product.GET("/:id/variants", productHandler.GetVariantByIdProduct)
+		product.GET("/:id/sizes", productHandler.GetSizesByIdProduct)
+	}
 	// Auth
 	auth := r.Group("/auth")
 	{
