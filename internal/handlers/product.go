@@ -35,7 +35,11 @@ func (h *ProductHandler) GetProducts(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(200, products)
+	ctx.JSON(200, dto.ResponseWrap{
+		Success: true,
+		Message: "List Of Products",
+		Results: products,
+	})
 }
 
 
