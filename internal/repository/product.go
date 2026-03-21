@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProductRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewProductRepository(db *pgx.Conn) *ProductRepository {
+func NewProductRepository(db *pgxpool.Pool) *ProductRepository {
 	return &ProductRepository{
 		db: db,
 	}
@@ -50,6 +51,7 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	products, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Product])
 	if err != nil {
@@ -87,12 +89,13 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 			ON td.id = rp.id_transaction_details
 		WHERE p.id = $1
 		GROUP BY  p.id;`
-	rows, err := r.db.Query(ctx, query, id)
+	row, err := r.db.Query(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
+	defer row.Close()
 
-	product, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.Product])
+	product, err := pgx.CollectOneRow(row, pgx.RowToStructByName[models.Product])
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +110,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, p dto.CreateProdu
 			description,
 			price,
 			stoct
-			crated_at) VALUES ($1, $2, $3, $4, $5)`
+			created_at) VALUES ($1, $2, $3, $4, $5)`
 	_, err := r.db.Exec(ctx, query,
 		p.Name,
 		p.Description,
@@ -151,10 +154,10 @@ func (r *ProductRepository) GetVariantsByIdProduct(ctx context.Context, id int) 
 	query := `
 		SELECT
 			v.id,
-			v.name,
-			v.add_price
+			COALESCE(v.name, '') AS name,
+	        COALESCE(v.add_price, 0) AS add_price
 		FROM product_variants pv
-		JOIN variants v ON pv.variant_id = v.id
+		LEFT JOIN variants v ON pv.variant_id = v.id
 		WHERE pv.product_id = $1`
 
 	rows, err := r.db.Query(ctx, query, id)
@@ -171,10 +174,10 @@ func (r *ProductRepository) GetVariantsByIdProduct(ctx context.Context, id int) 
 func (r *ProductRepository) GetSizesByIdProduct(ctx context.Context, id int) ([]models.Size, error) {
 	query := `SELECT
 		s.id,
-		s.name,
-		s.add_price
+	    COALESCE(s.name, '') AS name,
+	    COALESCE(s.add_price, 0) AS add_price
 	FROM product_sizes ps
-	JOIN sizes s ON ps.size_id = s.id
+	LEFT JOIN sizes s ON ps.size_id = s.id
 	WHERE ps.product_id = $1`
 
 	rows, err := r.db.Query(ctx, query, id)
