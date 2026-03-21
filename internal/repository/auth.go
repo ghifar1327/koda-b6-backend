@@ -4,14 +4,14 @@ import (
 	"backend/internal/models"
 	"context"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type AuthRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewAuthRepository(db *pgx.Conn) *AuthRepository {
+func NewAuthRepository(db *pgxpool.Pool) *AuthRepository {
 	return &AuthRepository{
 		db: db,
 	}

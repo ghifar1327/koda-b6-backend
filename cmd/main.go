@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
@@ -21,14 +21,14 @@ func main() {
 	godotenv.Load()
 	dbURL := os.Getenv("DATABASE_URL")
 
-	conn, err := pgx.Connect(context.Background(), dbURL)
+	pool, err := pgxpool.New(context.Background(), dbURL)
 	if err != nil {
 		panic(err)
 	}
 
 	r := gin.Default()
 
-	container := di.NewContainer(conn)
+	container := di.NewContainer(pool)
 
 	routes.Router(r, container)
 

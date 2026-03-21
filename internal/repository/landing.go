@@ -5,13 +5,14 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type LandingRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewLandingRepository(db *pgx.Conn) *LandingRepository {
+func NewLandingRepository(db *pgxpool.Pool) *LandingRepository {
 	return &LandingRepository{
 		db: db,
 	}

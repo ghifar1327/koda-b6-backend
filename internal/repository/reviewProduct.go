@@ -6,13 +6,14 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ReviewProductRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewReviewProductRepository(db *pgx.Conn) *ReviewProductRepository {
+func NewReviewProductRepository(db *pgxpool.Pool) *ReviewProductRepository {
 	return &ReviewProductRepository{
 		db: db,
 	}

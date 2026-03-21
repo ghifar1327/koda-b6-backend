@@ -5,11 +5,11 @@ import (
 	"backend/internal/repository"
 	"backend/internal/service"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Container struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 
 	// USER
 	userRepo    *repository.UserRepository
@@ -42,7 +42,7 @@ type Container struct {
 	reviewProductHandler *handlers.ReviewProductHandler
 }
 
-func NewContainer(db *pgx.Conn) *Container {
+func NewContainer(db *pgxpool.Pool) *Container {
 	container := &Container{
 		db: db,
 	}
