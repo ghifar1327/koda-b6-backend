@@ -106,7 +106,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, p dto.CreateProdu
 			name,
 			description,
 			price,
-			stoct,
+			stoct
 			crated_at) VALUES ($1, $2, $3, $4, $5)`
 	_, err := r.db.Exec(ctx, query,
 		p.Name,
@@ -143,4 +143,29 @@ func (r *ProductRepository) DeleteProduct(ctx context.Context, id int) error {
 	query := `DELETE FROM Products WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, id)
 	return err
+}
+
+
+// =============================================================================================== GET SIZE AND VARIANT PRODUCT
+
+func (r *ProductRepository) GetVariantsByIdProduct(ctx context.Context, id int) ([]models.Variant ,error){
+	query := `
+		SELECT
+			v.id,
+			v.name,
+			v.add_price
+		FROM product_variants pv
+		JOIN variants v ON pv.variant_id = v.id
+		WHERE pv.product_id = $1`
+	
+		rows , err := r.db.Query(ctx, query, id)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		variants , err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Variant])
+		if err != nil {
+			return nil, err
+		}
+		return variants, nil
 }
