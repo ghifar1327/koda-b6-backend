@@ -19,6 +19,18 @@ type Product struct {
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
+type Variant struct {
+	Id       int    `json:"id" db:"id"`
+	Name     string `json:"name" db:"name"`
+	AddPrice int    `json:"add_price" db:"add_price"`
+}
+
+type Size struct {
+	Id       int    `json:"id" db:"id"`
+	Name     string `json:"name" db:"name"`
+	AddPrice int    `json:"add_price" db:"add_price"`
+}
+
 type ReviewProduct struct {
 	Id                  int       `json:"id" db:"id"`
 	UserId              uuid.UUID `json:"user_id" db:"user_id"`
