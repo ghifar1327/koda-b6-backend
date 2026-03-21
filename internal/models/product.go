@@ -8,10 +8,12 @@ import (
 
 type Product struct {
 	Id          int       `json:"id" db:"id"`
+	Image       string    `json:"image" db:"image"`
 	Name        string    `json:"name" db:"name"`
 	Description string    `json:"description" db:"description"`
 	Price       int       `json:"price" db:"price"`
 	Categories  []string  `json:"categories" db:"categories"`
+	Rating      float64   `json:"rating" db:"rating"`
 	Stock       int       `json:"stock" db:"stock"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
