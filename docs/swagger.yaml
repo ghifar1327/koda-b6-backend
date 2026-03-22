@@ -11,6 +11,15 @@ definitions:
       variant_id:
         type: integer
     type: object
+  dto.CreateMasterRequest:
+    properties:
+      add_price:
+        type: number
+      name:
+        type: string
+    required:
+    - name
+    type: object
   dto.CreateProductRequest:
     properties:
       categories:
@@ -67,6 +76,15 @@ definitions:
     - email
     - password
     type: object
+  dto.Master:
+    properties:
+      add_price:
+        type: number
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   dto.RegisterRequest:
     properties:
       address:
@@ -117,6 +135,15 @@ definitions:
       results: {}
       success:
         type: boolean
+    type: object
+  dto.UpdateMasterRequest:
+    properties:
+      add_price:
+        type: number
+      name:
+        type: string
+    required:
+    - name
     type: object
   dto.UpdateUsersRequest:
     properties:
@@ -459,6 +486,139 @@ paths:
       summary: Reset password
       tags:
       - Auth
+  /master/{table}:
+    get:
+      description: Get sizes, variants, or methods
+      parameters:
+      - description: Table name
+        in: path
+        name: table
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Master'
+            type: array
+      summary: Get all master data
+      tags:
+      - Master
+    post:
+      consumes:
+      - application/json
+      description: Create sizes, variants, or methods
+      parameters:
+      - description: Table name (sizes/variants/methods)
+        in: path
+        name: table
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateMasterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Create master data
+      tags:
+      - Master
+  /master/{table}/{id}:
+    delete:
+      description: Delete sizes, variants, or methods
+      parameters:
+      - description: Table name
+        in: path
+        name: table
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Delete master data
+      tags:
+      - Master
+    get:
+      description: Get detail sizes, variants, or methods
+      parameters:
+      - description: Table name
+        in: path
+        name: table
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Master'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Get master by ID
+      tags:
+      - Master
+    patch:
+      consumes:
+      - application/json
+      description: Update sizes, variants, or methods
+      parameters:
+      - description: Table name
+        in: path
+        name: table
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateMasterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+      summary: Update master data
+      tags:
+      - Master
   /products:
     get:
       consumes:
