@@ -218,10 +218,10 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 		id, 
 		user_id,
 		status,
-		id_methode,
+		id_method,
 		payment_method,
 		id_voucher,
-		created_at) VALUES ($1, $2, $3, $4, $5, $6)`
+		created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 	_, err = tx.Exec(ctx, query,
 		IdTransaction,
 		req.UserId,
@@ -241,7 +241,8 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 		product_id,
 		size_id,
 		variant_id,
-		quantity)`
+		quantity
+		) VALUES ($1, $2, $3, $4, $5)`
 
 		_, err = tx.Exec(ctx, queryDetail,
 			IdTransaction,
@@ -256,8 +257,8 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 
 		updateStock := `
 		UPDATE products
-		SET stoct - $1
-		WHERE id = &2 AND stock >= $1
+		SET stock = stock - $1
+		WHERE id = $2 AND stock >= $1
 		`
 		result, err := tx.Exec(ctx, updateStock,
 			item.Quantity,
