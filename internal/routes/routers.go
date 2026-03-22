@@ -27,6 +27,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	landingHandler := container.LandingHandler()
 	reviewProductHandler := container.ReviewProductHandler()
 	transactionHandler := container.TransactionHandler()
+	masterHandler := container.MasterHandler()
 
 	admin := r.Group("/admin")
 	// admin.Use(middleware.AuthMiddleware())
@@ -40,10 +41,10 @@ func Router(r *gin.Engine, container *di.Container) {
 			users.DELETE("/:id", userHandler.DeleteUser)
 		}
 		//PRODUCT
-		
+
 	}
 	// =========================================================== FEATURE
-	
+
 	product := r.Group("/products")
 	{
 		product.POST("", productHandler.CreateProduct)
@@ -62,10 +63,11 @@ func Router(r *gin.Engine, container *di.Container) {
 	}
 
 	// TRANSACSION
-	transaction := r.Group("/transaction")
+	transaction := r.Group("/transactions")
 	{
 		transaction.GET("", transactionHandler.GetAllTransactions)
 		transaction.GET("/:id", transactionHandler.GetTransactionbyID)
+		transaction.POST("", transactionHandler.CreateTransaction)
 	}
 
 	//reviews
@@ -85,5 +87,15 @@ func Router(r *gin.Engine, container *di.Container) {
 		landing.GET("/reviews/:id", landingHandler.GetRecommendedProductByID)
 		landing.GET("/recommended-product", landingHandler.GetRecommendedProducts)
 		landing.GET("/recommended-product/:id", landingHandler.GetRecommendedProductByID)
+	}
+
+	// MASTER
+	master := r.Group("master")
+	{
+		master.POST("/:table", masterHandler.Create)
+		master.GET("/:table", masterHandler.GetAll)
+		master.GET("/:table/:id", masterHandler.GetById)
+		master.PATCH("/:table/:id", masterHandler.Update)
+		master.DELETE("/:table/:id", masterHandler.Delete)
 	}
 }
