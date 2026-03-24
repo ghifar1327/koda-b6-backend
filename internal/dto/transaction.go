@@ -1,6 +1,8 @@
 package dto
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type UpdateTransactionRequst struct {
 	Status string `json:"status"`
@@ -8,6 +10,7 @@ type UpdateTransactionRequst struct {
 
 type CreateTransactionRequest struct {
 	UserId        uuid.UUID           `json:"user_id"`
+	Address       string              `json:"address"`
 	IdMethod      int                 `json:"id_method"`
 	PaymentMethod string              `json:"payment_method"`
 	IdVoucher     *int                `json:"id_voucher"`
@@ -15,7 +18,6 @@ type CreateTransactionRequest struct {
 }
 
 type CreateItemRequest struct {
-	
 	ProductId int `json:"product_id"`
 	SizeId    int `json:"size_id"`
 	VariantId int `json:"variant_id"`
