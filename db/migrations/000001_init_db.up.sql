@@ -48,11 +48,13 @@ CREATE TABLE if NOT EXISTS vouchers (
 CREATE TABLE if NOT EXISTS transactions (
     id UUID PRIMARY KEY,
     user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    address VARCHAR(225) NOT NULL,
     status VARCHAR(100) NOT NULL,
     id_method INT REFERENCES methods(id),
     payment_method VARCHAR(100) NOT NULL,
     id_voucher INT REFERENCES vouchers(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ===================================================================================== VARIANT
