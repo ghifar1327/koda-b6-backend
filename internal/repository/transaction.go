@@ -27,12 +27,13 @@ func (r *TransactionRepository) GetAllTransaction(ctx context.Context) ([]models
 	query := `SELECT
 	t.id,
 	u.full_name,
-	u.address,
+	t.address,
 	u.phone,
 	m.name AS shipping,
 	t.payment_method,
 	t.status,
 	t.created_at,
+	t.updeted_at,
 
 	p.name AS product_name,
 	img.url AS product_image,
@@ -122,12 +123,14 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 	SELECT
 	t.id,
 	u.full_name,
-	u.address,
+	t.address,
 	u.phone,
 	m.name AS shipping,
 	t.payment_method,
 	t.status,
 	t.created_at,
+	t.updeted_at,
+
 
 	p.name AS product_name,
 	img.url AS product_image,
@@ -178,6 +181,7 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 		PaymentMethod: result[0].PaymentMethod,
 		Status:        result[0].Status,
 		CreatedAt:     result[0].CreatedAt,
+		UpdatedAt:     result[0].UpdatedAt,
 	}
 
 	total := 0
@@ -217,18 +221,22 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 	query := `INSERT INTO transactions (
 		id, 
 		user_id,
+		address,
 		status,
 		id_method,
 		payment_method,
 		id_voucher,
-		created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+		created_at,
+		updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 	_, err = tx.Exec(ctx, query,
 		IdTransaction,
 		req.UserId,
+		req.Address,
 		"pending",
 		req.IdMethod,
 		req.PaymentMethod,
 		req.IdVoucher,
+		time.Now(),
 		time.Now(),
 	)
 	if err != nil {
@@ -280,8 +288,8 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 
 func (r *TransactionRepository) UpdateTransaction(ctx context.Context, id uuid.UUID, status string) error {
 	query := `
-	    UPDATE Transactions SET status=$1, WHERE id=$2`
-	_, err := r.db.Exec(ctx, query, status, id)
+	    UPDATE Transactions SET status=$1 ,updated_at = $2, WHERE id = $3`
+	_, err := r.db.Exec(ctx, query, status, time.Now(), id)
 	return err
 }
 
