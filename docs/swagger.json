@@ -1301,6 +1301,9 @@
         "dto.CreateTransactionRequest": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "id_method": {
                     "type": "integer"
                 },
@@ -1629,6 +1632,9 @@
                 },
                 "total_transaction": {
                     "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

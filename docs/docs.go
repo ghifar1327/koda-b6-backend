@@ -1307,6 +1307,9 @@ const docTemplate = `{
         "dto.CreateTransactionRequest": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "id_method": {
                     "type": "integer"
                 },
@@ -1635,6 +1638,9 @@ const docTemplate = `{
                 },
                 "total_transaction": {
                     "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
