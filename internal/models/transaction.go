@@ -17,6 +17,7 @@ type Transaction struct {
 	TotalTransaction int          `json:"total_transaction" db:"total_transaction"`
 	Items            []ItemDetail `json:"items" db:"items"`
 	CreatedAt        time.Time    `json:"created_at" db:"created_at"`
+	UpdatedAt        time.Time    `json:"updated_at" db:"updated_at"`
 }
 
 type ItemDetail struct {
@@ -38,6 +39,7 @@ type TransactionRow struct {
 	PaymentMethod string    `json:"payment_method" db:"payment_method"`
 	Status        string    `json:"status" db:"status"`
 	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
 
 	ProductName  string `json:"product_name" db:"product_name"`
 	ProductImage string `json:"product_image" db:"product_image"`
