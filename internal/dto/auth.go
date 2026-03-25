@@ -21,3 +21,10 @@ type ResetPwdRequest struct {
 type ForgotPasswordRequest struct {
 	Email string `json:"email"`
 }
+
+type UpdateProfileRequest struct {
+	FullName string `json:"full_name"`
+	Email    string `json:"email"`
+	Address  string `json:"address"`
+	Phone    string `json:"phone"`
+}
