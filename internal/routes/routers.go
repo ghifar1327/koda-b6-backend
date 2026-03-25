@@ -87,6 +87,10 @@ func Router(r *gin.Engine, container *di.Container) {
 			review.PATCH("/:id", reviewHandler.UpdateReviewProduct)
 			review.DELETE("/:id", reviewHandler.DeleteReviewProduct)
 		}
+		auth := r.Group("/auth")
+		{
+			auth.PATCH("/:id/update", authHandler.UpdateProfile)
+		}
 	}
 
 	// ========================================================================== ADMIN

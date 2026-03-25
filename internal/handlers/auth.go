@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -177,5 +178,50 @@ func (h *AuthHandler) ResetPassword(ctx *gin.Context) {
 	ctx.JSON(200, dto.Response{
 		Success: true,
 		Message: "reset password successfully",
+	})
+}
+
+// UpdateProfile godoc
+// @Summary Update Profile
+// @Description Update Profile data by UUID
+// @Tags Profile
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID (UUID)"
+// @Param user body dto.UpdateProfileRequest true "Update User Data"
+// @Success 200 {object} dto.Response
+// @Failure 400 {object} dto.Response
+// @Failure 404 {object} dto.Response
+// @Router /auth/{id}/update [patch]
+func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid user id",
+		})
+		return
+	}
+	var req dto.UpdateProfileRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	if err := h.service.UpdateProfile(ctx.Request.Context(), id, req); err != nil {
+		ctx.JSON(http.StatusNotFound, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Message: "Provile updated successfully",
 	})
 }
