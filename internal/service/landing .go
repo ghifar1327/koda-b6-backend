@@ -16,12 +16,12 @@ func NewLandingService(repo *repository.LandingRepository) *LandingService {
 	}
 }
 
-func (s *LandingService) GetAllReviewProducts(ctx context.Context) ([]models.Reviews, error) {
-	return s.repo.GetAllReviewProducs(ctx)
+func (s *LandingService) GetAllReviewProductsLanding(ctx context.Context) ([]models.Reviews, error) {
+	return s.repo.GetAllReviewProductsLanding(ctx)
 }
 
-func (s *LandingService) GetReviwProductByID(ctx context.Context, id int) (*models.Reviews, error) {
-	return s.repo.GetReviwProductByID(ctx, id)
+func (s *LandingService) GetReviewProductLandingByID(ctx context.Context, id int) (*models.Reviews, error) {
+	return s.repo.GetReviewProductLandingByID(ctx, id)
 }
 
 
