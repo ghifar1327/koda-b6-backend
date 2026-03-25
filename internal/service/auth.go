@@ -59,7 +59,7 @@ func (a AuthService) Login(ctx context.Context, req dto.LoginRequest) (string, e
 		return "", err
 	}
 	if valid {
-		token, err := utils.GenerateToken(user.Id)
+		token, err := utils.GenerateToken(user)
 		if err != nil {
 			return "", err
 		}
