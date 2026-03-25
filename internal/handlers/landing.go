@@ -20,7 +20,7 @@ func NewLandingHandler(s *service.LandingService) *LandingHandler {
 }
 
 
-// GetAllReviewProducts godoc
+// GetAllReviewProductsLanding godoc
 // @Summary Get all review products
 // @Description Retrieve all review products for landing page
 // @Tags Landing
@@ -29,8 +29,8 @@ func NewLandingHandler(s *service.LandingService) *LandingHandler {
 // @Success 200 {array} models.ReviewProduct
 // @Failure 500 {object} dto.Response
 // @Router /reviews [get]
-func (h *LandingHandler) GetAllReviewProducts(ctx *gin.Context) {
-	products, err := h.service.GetAllReviewProducts(ctx.Request.Context())
+func (h *LandingHandler) GetAllReviewProductsLanding(ctx *gin.Context) {
+	products, err := h.service.GetAllReviewProductsLanding(ctx.Request.Context())
 	if err != nil {
 		ctx.JSON(500, dto.Response{
 			Success: false,
@@ -41,7 +41,7 @@ func (h *LandingHandler) GetAllReviewProducts(ctx *gin.Context) {
 }
 
 
-// GetReviewProductByID godoc
+// GetReviewProductLandingByID godoc
 // @Summary Get review product by ID
 // @Description Retrieve review product by ID
 // @Tags Landing
@@ -52,13 +52,13 @@ func (h *LandingHandler) GetAllReviewProducts(ctx *gin.Context) {
 // @Failure 400 {object} dto.Response
 // @Failure 404 {object} dto.Response
 // @Router /reviews/{id} [get]
-func (h *LandingHandler) GetReviwProductByID(ctx *gin.Context) {
+func (h *LandingHandler) GetReviewProductLandingByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-	product, err := h.service.GetReviwProductByID(ctx.Request.Context(), id)
+	product, err := h.service.GetReviewProductLandingByID(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
 			Success: false,

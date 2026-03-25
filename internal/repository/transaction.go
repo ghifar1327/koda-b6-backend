@@ -4,25 +4,38 @@ import (
 	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type TransactionRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
-func NewTransactionRepository(db *pgxpool.Pool) *TransactionRepository {
+func NewTransactionRepository(db *pgxpool.Pool, redis *redis.Client) *TransactionRepository {
 	return &TransactionRepository{
-		db: db,
+		db:  db,
+		rdb: redis,
 	}
 }
 
 func (r *TransactionRepository) GetAllTransaction(ctx context.Context) ([]models.Transaction, error) {
+	key := "get-all-transaction"
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.Transaction
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return result, nil
+		}
+	}
 
 	query := `SELECT
 	t.id,
@@ -113,11 +126,25 @@ func (r *TransactionRepository) GetAllTransaction(ctx context.Context) ([]models
 		transactions = append(transactions, *v)
 	}
 
+	data, err := json.Marshal(transactions)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
+
 	return transactions, nil
 }
 
 // ====================================================================================================================================== Get Transaction By ID
 func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
+
+	key := fmt.Sprintf("get-transaction-by-id:%s", id.String())
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result models.Transaction
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return &result, nil
+		}
+	}
 
 	query := `
 	SELECT
@@ -205,6 +232,11 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 
 	trx.TotalTransaction = total
 
+	data, err := json.Marshal(trx)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
+
 	return &trx, nil
 }
 
@@ -290,6 +322,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, id uuid.U
 	query := `
 	    UPDATE Transactions SET status=$1 ,updated_at = $2, WHERE id = $3`
 	_, err := r.db.Exec(ctx, query, status, time.Now(), id)
+	r.rdb.Del(ctx, fmt.Sprintf("get-transaction-by-id:%s", id.String()))
 	return err
 }
 
@@ -297,5 +330,6 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, id uuid.U
 func (r *TransactionRepository) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM Transactions WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, id)
+	r.rdb.Del(ctx, fmt.Sprintf("get-transaction-by-id:%s", id.String()))
 	return err
 }

@@ -4,23 +4,37 @@ import (
 	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type ProductRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
-func NewProductRepository(db *pgxpool.Pool) *ProductRepository {
+func NewProductRepository(db *pgxpool.Pool, rdb *redis.Client) *ProductRepository {
 	return &ProductRepository{
-		db: db,
+		db:  db,
+		rdb: rdb,
 	}
 }
 
 func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Product, error) {
+	key := "product"
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.Product
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return result, nil
+		}
+	}
+
 	query := `
 		SELECT
 		  p.id,
@@ -58,10 +72,23 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 		return nil, err
 	}
 
+	data, err := json.Marshal(products)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
+
 	return products, nil
 }
 
 func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models.Product, error) {
+	key := fmt.Sprintf("get-product-by-id:%d", id)
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result models.Product
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return &result, nil
+		}
+	}
 	query := `
 		SELECT
 		  p.id,
@@ -139,18 +166,29 @@ func (r *ProductRepository) UpdateProduct(ctx context.Context, id int, p models.
 		p.Stock,
 		time.Now(),
 		id)
+
+	r.rdb.Del(ctx, fmt.Sprintf("get-product-by-id:%d", id))
 	return err
 }
 
 func (r *ProductRepository) DeleteProduct(ctx context.Context, id int) error {
 	query := `DELETE FROM Products WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, id)
+	r.rdb.Del(ctx, fmt.Sprintf("get-product-by-id:%d", id))
 	return err
 }
 
 // =============================================================================================== GET SIZE AND VARIANT PRODUCT
 
 func (r *ProductRepository) GetVariantsByIdProduct(ctx context.Context, id int) ([]models.Variant, error) {
+	key := fmt.Sprintf("get-variant-product-by-id:%d", id)
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.Variant
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return result, nil
+		}
+	}
 	query := `
 		SELECT
 			v.id,
@@ -169,9 +207,24 @@ func (r *ProductRepository) GetVariantsByIdProduct(ctx context.Context, id int) 
 	if err != nil {
 		return nil, err
 	}
+
+	data, err := json.Marshal(variants)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
+
 	return variants, nil
 }
 func (r *ProductRepository) GetSizesByIdProduct(ctx context.Context, id int) ([]models.Size, error) {
+	key := fmt.Sprintf("get-size-by-product-id:%d", id)
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.Size
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return result, nil
+		}
+	}
+	
 	query := `SELECT
 		s.id,
 	    COALESCE(s.name, '') AS name,
@@ -188,6 +241,11 @@ func (r *ProductRepository) GetSizesByIdProduct(ctx context.Context, id int) ([]
 	sizes, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.Size])
 	if err != nil {
 		return nil, err
+	}
+
+	data, err := json.Marshal(sizes)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
 	}
 	return sizes, nil
 }

@@ -90,7 +90,7 @@ func (h *TransactionHandler) CreateTransaction(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
-			Message: "Failed Crete Trasaction",
+			Message: err.Error(),
 		})
 		return
 	}

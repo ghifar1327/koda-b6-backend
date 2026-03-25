@@ -3,22 +3,38 @@ package repository
 import (
 	"backend/internal/models"
 	"context"
+	"encoding/json"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type LandingRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
-func NewLandingRepository(db *pgxpool.Pool) *LandingRepository {
+func NewLandingRepository(db *pgxpool.Pool, rdb *redis.Client) *LandingRepository {
 	return &LandingRepository{
-		db: db,
+		db:  db,
+		rdb: rdb,
 	}
 }
 
-func (r *LandingRepository) GetAllReviewProducs(ctx context.Context) ([]models.Reviews, error) {
+func (r *LandingRepository) GetAllReviewProductsLanding(ctx context.Context) ([]models.Reviews, error) {
+	key := "landing/reviews"
+
+	// cek redis
+	cached , err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.Reviews
+		if err := json.Unmarshal([]byte(cached), &result); err == nil{
+				return result, nil
+		}
+	}
+
 	query := `
 		SELECT 
             p.id,
@@ -47,9 +63,15 @@ func (r *LandingRepository) GetAllReviewProducs(ctx context.Context) ([]models.R
 		return nil, err
 	}
 
+	// simpan ke redis
+	data , err := json.Marshal(reviews)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute * 15)
+	}
+
 	return reviews, nil
 }
-func (r *LandingRepository) GetReviwProductByID(ctx context.Context, id int) (*models.Reviews, error) {
+func (r *LandingRepository) GetReviewProductLandingByID(ctx context.Context, id int) (*models.Reviews, error) {
 	query := `
 		SELECT 
         p.id,
@@ -82,6 +104,16 @@ func (r *LandingRepository) GetReviwProductByID(ctx context.Context, id int) (*m
 // ======================================================================================================================================================== RECOMMENDED PRODUCT
 
 func (r *LandingRepository) GetRecommendedProducts(ctx context.Context) ([]models.RecommendedProduct, error) {
+	
+	key := "landing/recomended-product"
+
+	cached , err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.RecommendedProduct
+		if err := json.Unmarshal([]byte(cached), &result); err == nil{
+				return result, nil
+		}
+	}
 	query := `
 		SELECT 
             p.id,
@@ -105,9 +137,15 @@ func (r *LandingRepository) GetRecommendedProducts(ctx context.Context) ([]model
 		return nil, err
 	}
 	defer rows.Close()
+
 	recommended, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.RecommendedProduct])
 	if err != nil {
 		return nil, err
+	}
+
+	data , err := json.Marshal(recommended)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute * 15)
 	}
 
 	return recommended, nil
@@ -133,13 +171,13 @@ func (r *LandingRepository) GetRecommendedProductByID(ctx context.Context, id in
 	GROUP BY p.id, p.name, i.url, p.description, p.price
 	`
 
-	rows, err := r.db.Query(ctx, query, id)
+	row, err := r.db.Query(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer row.Close()
 
-	rp, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.RecommendedProduct])
+	rp, err := pgx.CollectOneRow(row, pgx.RowToStructByName[models.RecommendedProduct])
 	if err != nil {
 		return nil, err
 	}

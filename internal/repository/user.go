@@ -3,24 +3,39 @@ package repository
 import (
 	"backend/internal/models"
 	"context"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type UserRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
-func NewUserrepository(db *pgxpool.Pool) *UserRepository {
+func NewUserrepository(db *pgxpool.Pool, rdb *redis.Client) *UserRepository {
 	return &UserRepository{
-		db: db,
+		db:  db,
+		rdb: rdb,
 	}
 }
 
 func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) {
+	key := "users"
+
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.User
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return result, nil
+		}
+	}
+
 	query := `
 		SELECT 
 			id, 
@@ -43,11 +58,26 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 		return nil, err
 	}
 
+	data, err := json.Marshal(users)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
+
 	return users, nil
 }
 
 // ==================================================================================================================================================== Get User By ID
 func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	key := fmt.Sprintf("user:id:%s", id.String())
+
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result models.User
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return &result, nil
+		}
+	}
+
 	query := `
 		SELECT 
 			id, 
@@ -70,6 +100,10 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
 		return nil, err
+	}
+	data, err := json.Marshal(user)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
 	}
 
 	return &user, nil
@@ -117,6 +151,9 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.
 		u.RoleId,
 		time.Now(),
 		id)
+
+	r.rdb.Del(ctx, fmt.Sprintf("user:id:%s", id.String()))
+	r.rdb.Del(ctx, fmt.Sprintf("user:email:%s", u.Email))
 	return err
 }
 
@@ -124,10 +161,20 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.
 func (r *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM users WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, id)
+	r.rdb.Del(ctx, fmt.Sprintf("user:id:%s", id.String()))
 	return err
 }
 
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	key := fmt.Sprintf("user:email:%s", email)
+
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result models.User
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return &result, nil
+		}
+	}
 	query := `
 		SELECT 
 			id,
@@ -143,24 +190,21 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 		FROM users
 		WHERE email=$1
 	`
-
-	var user models.User
-
-	err := r.db.QueryRow(ctx, query, email).Scan(
-		&user.Id,
-		&user.FullName,
-		&user.Picture,
-		&user.Email,
-		&user.Password,
-		&user.RoleId,
-		&user.Phone,
-		&user.Address,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-	)
-
+	row, err := r.db.Query(ctx, query, email)
 	if err != nil {
 		return nil, err
+	}
+
+	defer row.Close()
+
+	user, err := pgx.CollectOneRow(row, pgx.RowToStructByName[models.User])
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := json.Marshal(user)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
 	}
 
 	return &user, nil

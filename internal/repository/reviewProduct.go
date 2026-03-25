@@ -4,24 +4,38 @@ import (
 	"backend/internal/dto"
 	"backend/internal/models"
 	"context"
+	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type ReviewProductRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
-func NewReviewProductRepository(db *pgxpool.Pool) *ReviewProductRepository {
+func NewReviewProductRepository(db *pgxpool.Pool, rdb *redis.Client) *ReviewProductRepository {
 	return &ReviewProductRepository{
-		db: db,
+		db:  db,
+		rdb: rdb,
 	}
 }
 
 // ======================================================================================================== GET ALL REVIEW PRODUCTS
 
 func (r *ReviewProductRepository) GetAllReviewProducts(ctx context.Context) ([]models.ReviewProduct, error) {
+	key := "get-all-review-products"
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result []models.ReviewProduct
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return result, nil
+		}
+	}
 	query := `
 		SELECT 
 			id, 
@@ -42,12 +56,26 @@ func (r *ReviewProductRepository) GetAllReviewProducts(ctx context.Context) ([]m
 		return nil, err
 	}
 
+	data, err := json.Marshal(reviewProducts)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
+
 	return reviewProducts, nil
 }
 
 // ======================================================================================================== GET REVIEW PRODUCT BY ID
 
 func (r *ReviewProductRepository) GetReviewProductByID(ctx context.Context, id int) (*models.ReviewProduct, error) {
+	key := fmt.Sprintf("get-review-product-by-id:%d", id)
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result models.ReviewProduct
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return &result, nil
+		}
+	}
+
 	query := `
 		SELECT 
 			id, 
@@ -69,6 +97,10 @@ func (r *ReviewProductRepository) GetReviewProductByID(ctx context.Context, id i
 		return nil, err
 	}
 
+	data, err := json.Marshal(reviewProduct)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
 	return &reviewProduct, nil
 }
 
@@ -110,6 +142,7 @@ func (r *ReviewProductRepository) UpdateReviewProduct(ctx context.Context, id in
 		id,
 	)
 
+	r.rdb.Del(ctx, fmt.Sprintf("get-review-product-by-id:%d", id))
 	return err
 }
 
@@ -120,7 +153,7 @@ func (r *ReviewProductRepository) DeleteReviewProduct(ctx context.Context, id in
 		DELETE FROM review_product 
 		WHERE id=$1
 	`
-
 	_, err := r.db.Exec(ctx, query, id)
+	r.rdb.Del(ctx, fmt.Sprintf("get-review-product-by-id:%d", id))
 	return err
 }
