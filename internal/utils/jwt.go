@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"backend/internal/models"
 	"os"
 	"time"
 
@@ -10,11 +11,12 @@ import (
 )
 
 type ClaimCustomJwt struct {
-	Id uuid.UUID `json:"id"`
+	Id     uuid.UUID `json:"id"`
+	RoleId int       `json:"role_id"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userId uuid.UUID) (string, error) {
+func GenerateToken(user *models.User) (string, error) {
 
 	godotenv.Load()
 	mySecret := os.Getenv("SECRET_KEY")
@@ -22,7 +24,8 @@ func GenerateToken(userId uuid.UUID) (string, error) {
 	// claim isinya data-data yang disimpan di dalam JWT.
 	// generate claim, claims = payload
 	claims := ClaimCustomJwt{
-		Id: userId,
+		Id: user.Id,
+		RoleId: user.RoleId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
