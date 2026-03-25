@@ -5,11 +5,10 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func CorsMiddleware() gin.HandlerFunc {
-	godotenv.Load()
+	// godotenv.Load()
 	return func(ctx *gin.Context) {
 
 		ctx.Header("Access-Control-Allow-Origin", os.Getenv("FRONTEND_URL"))
