@@ -104,7 +104,6 @@ func Router(r *gin.Engine, container *di.Container) {
 
 		transaction := admin.Group("/transaction")
 		{
-			transaction.POST("", transactionHandler.CreateTransaction)
 			transaction.PATCH("/:id", transactionHandler.UpdateTransaction)
 			transaction.DELETE("/:id", transactionHandler.DeleteTransaction)
 		}

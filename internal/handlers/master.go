@@ -35,7 +35,7 @@ func isValidTable(table string) bool {
 // @Param request body dto.CreateMasterRequest true "Request body"
 // @Success 200 {object} dto.Response
 // @Failure 400 {object} dto.Response
-// @Router /master/{table} [post]
+// @Router admin/master/{table} [post]
 func (h *MasterHandler) Create(ctx *gin.Context) {
 	table := ctx.Param("table")
 
@@ -162,7 +162,7 @@ func (h *MasterHandler) GetById(ctx *gin.Context) {
 // @Param id path int true "ID"
 // @Param request body dto.UpdateMasterRequest true "Request body"
 // @Success 200 {object} dto.Response
-// @Router /master/{table}/{id} [patch]
+// @Router admin/master/{table}/{id} [patch]
 func (h *MasterHandler) Update(ctx *gin.Context) {
 	table := ctx.Param("table")
 
@@ -215,7 +215,7 @@ func (h *MasterHandler) Update(ctx *gin.Context) {
 // @Param table path string true "Table name"
 // @Param id path int true "ID"
 // @Success 200 {object} dto.Response
-// @Router /master/{table}/{id} [delete]
+// @Router admin/master/{table}/{id} [delete]
 func (h *MasterHandler) Delete(ctx *gin.Context) {
 	table := ctx.Param("table")
 
