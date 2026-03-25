@@ -13,7 +13,7 @@ import (
 )
 
 type Container struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
 	rdb *redis.Client
 
 	// USER
@@ -46,8 +46,8 @@ type Container struct {
 	reviewProductSevice  *service.ReviewProductService
 	reviewProductHandler *handlers.ReviewProductHandler
 
-	// MASTER 
-	masterRepo *repository.MasterRepository
+	// MASTER
+	masterRepo    *repository.MasterRepository
 	masterService *service.MasterService
 	masterHandler *handlers.MasterHandler
 }
@@ -55,13 +55,13 @@ type Container struct {
 func NewContainer(db *pgxpool.Pool) *Container {
 	godotenv.Load()
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s",os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
+		Addr:     fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
 		Password: "",
-		DB: 0,
+		DB:       0,
 	})
 
 	container := &Container{
-		db: db,
+		db:  db,
 		rdb: redisClient,
 	}
 
@@ -78,12 +78,12 @@ func (c *Container) initDependencies() {
 	c.userHandler = handlers.NewUserHandler(c.userService)
 
 	//AUTH
-	c.fpRepo = repository.NewAuthRepository(c.db)
+	c.fpRepo = repository.NewAuthRepository(c.db, c.rdb)
 	c.fpService = service.NewAuthService(c.userRepo, c.fpRepo)
 	c.authHandler = handlers.NewAuthHandler(c.fpService)
 
 	//LANDING
-	c.landingRepo = repository.NewLandingRepository(c.db , c.rdb)
+	c.landingRepo = repository.NewLandingRepository(c.db, c.rdb)
 	c.landingService = service.NewLandingService(c.landingRepo)
 	c.landingHandler = handlers.NewLandingHandler(c.landingService)
 
@@ -102,8 +102,8 @@ func (c *Container) initDependencies() {
 	c.reviewProductSevice = service.NewReviewProductService(c.reviewProductRepo)
 	c.reviewProductHandler = handlers.NewReviewProductHandler(c.reviewProductSevice)
 
-	//MASTER 
-	c.masterRepo = repository.NewMasterRepositoy(c.db ,c.rdb)
+	//MASTER
+	c.masterRepo = repository.NewMasterRepositoy(c.db, c.rdb)
 	c.masterService = service.NewMasterService(c.masterRepo)
 	c.masterHandler = handlers.NewMasterHandler(c.masterService)
 }
@@ -128,6 +128,6 @@ func (c *Container) ReviewProductHandler() *handlers.ReviewProductHandler {
 	return c.reviewProductHandler
 }
 
-func (c *Container) MasterHandler() *handlers.MasterHandler{
-	return c.masterHandler	
+func (c *Container) MasterHandler() *handlers.MasterHandler {
+	return c.masterHandler
 }
