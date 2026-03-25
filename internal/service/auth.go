@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,13 +16,13 @@ import (
 
 type AuthService struct {
 	userRepo *repository.UserRepository
-	fgRepo   *repository.AuthRepository
+	authRepo *repository.AuthRepository
 }
 
-func NewAuthService(ur *repository.UserRepository, fg *repository.AuthRepository) *AuthService {
+func NewAuthService(ur *repository.UserRepository, ar *repository.AuthRepository) *AuthService {
 	return &AuthService{
 		userRepo: ur,
-		fgRepo:   fg,
+		authRepo: ar,
 	}
 }
 
@@ -84,7 +85,7 @@ func (s *AuthService) RequestForgotPwd(ctx context.Context, email string) error 
 		Email: user.Email,
 		Code:  otp,
 	}
-	return s.fgRepo.CreateForgotPWD(ctx, newData)
+	return s.authRepo.CreateForgotPWD(ctx, newData)
 }
 
 func (s *AuthService) ResetPassword(ctx context.Context, req dto.ResetPwdRequest) error {
@@ -93,7 +94,7 @@ func (s *AuthService) ResetPassword(ctx context.Context, req dto.ResetPwdRequest
 		return err
 	}
 
-	data, err := s.fgRepo.GetForgotPWDByEmail(ctx, req.Email)
+	data, err := s.authRepo.GetForgotPWDByEmail(ctx, req.Email)
 	if err != nil {
 		return err
 	}
@@ -111,8 +112,33 @@ func (s *AuthService) ResetPassword(ctx context.Context, req dto.ResetPwdRequest
 	if err := s.userRepo.UpdateUser(ctx, user.Id, *user); err != nil {
 		return err
 	}
-	return s.fgRepo.DeleteForgotPWDByCode(ctx, req.Code)
+	return s.authRepo.DeleteForgotPWDByCode(ctx, req.Code)
 }
-func (s *AuthService) GetUserBYEmail(ctx context.Context, email string) (*models.User , error){
-	return  s.userRepo.GetUserByEmail(ctx, email)
+func (s *AuthService) GetUserBYEmail(ctx context.Context, email string) (*models.User, error) {
+	return s.userRepo.GetUserByEmail(ctx, email)
+}
+
+func (s *AuthService) UpdateProfile(ctx context.Context, id uuid.UUID, req dto.UpdateProfileRequest) error {
+	user, err := s.userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if strings.TrimSpace(req.FullName) != "" {
+		user.FullName = req.FullName
+	}
+
+	if strings.TrimSpace(req.Email) != "" {
+		if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
+			return errors.New("invalid email format")
+		}
+		user.Email = req.Email
+	}
+	if strings.TrimSpace(req.Address) != "" {
+		user.Address = req.Address
+	}
+	if strings.TrimSpace(req.Phone) != "" {
+		user.Phone = req.Phone
+	}
+
+	return s.authRepo.UpdateProfile(ctx, id, req)
 }
