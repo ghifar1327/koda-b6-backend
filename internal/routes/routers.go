@@ -12,27 +12,88 @@ import (
 
 func Router(r *gin.Engine, container *di.Container) {
 
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Use(middleware.CorsMiddleware())
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
-			"succes": "wellcome to backend",
+			"success": "welcome to backend",
 		})
 	})
-	//user
+
+	// handler
 	userHandler := container.UserHandler()
-	AuthHandler := container.AuthHandler()
+	authHandler := container.AuthHandler()
 	productHandler := container.ProductHandler()
 	landingHandler := container.LandingHandler()
-	reviewProductHandler := container.ReviewProductHandler()
+	reviewHandler := container.ReviewProductHandler()
 	transactionHandler := container.TransactionHandler()
 	masterHandler := container.MasterHandler()
 
-	admin := r.Group("/admin")
-	// admin.Use(middleware.AuthMiddleware())
+	// ======================================================================== PUBLIC
+
+	product := r.Group("/products")
 	{
-		//users
+		product.GET("", productHandler.GetProducts)
+		product.GET("/:id", productHandler.GetProductbyID)
+		product.GET("/:id/variants", productHandler.GetVariantByIdProduct)
+		product.GET("/:id/sizes", productHandler.GetSizesByIdProduct)
+	}
+
+	auth := r.Group("/auth")
+	{
+		auth.POST("/register", authHandler.Register)
+		auth.POST("/login", authHandler.Login)
+		auth.POST("/forgot-password", authHandler.RequestForgotPwd)
+		auth.PATCH("/reset-password", authHandler.ResetPassword)
+	}
+
+	review := r.Group("/review-product")
+	{
+		review.GET("", reviewHandler.GetAllReviewProducts)
+		review.GET("/:id", reviewHandler.GetReviewProductbyID)
+	}
+
+	landing := r.Group("/landing")
+	{
+		landing.GET("/reviews", landingHandler.GetAllReviewProductsLanding)
+		landing.GET("/reviews/:id", landingHandler.GetRecommendedProductByID)
+		landing.GET("/recommended-product", landingHandler.GetRecommendedProducts)
+		landing.GET("/recommended-product/:id", landingHandler.GetRecommendedProductByID)
+	}
+
+	master := r.Group("/master")
+	{
+		master.GET("/:table", masterHandler.GetAll)
+		master.GET("/:table/:id", masterHandler.GetById)
+	}
+
+	// ========================================================================= USER (LOGIN REQUIRED)
+
+	user := r.Group("/")
+	user.Use(middleware.AuthMiddleware())
+	{
+		transaction := user.Group("/transactions")
+		{
+			transaction.POST("", transactionHandler.CreateTransaction)
+			transaction.GET("", transactionHandler.GetAllTransactions)
+			transaction.GET("/:id", transactionHandler.GetTransactionbyID)
+		}
+
+		review := user.Group("/review-product")
+		{
+			review.POST("", reviewHandler.CreateReviewProduct)
+			review.PATCH("/:id", reviewHandler.UpdateReviewProduct)
+			review.DELETE("/:id", reviewHandler.DeleteReviewProduct)
+		}
+	}
+
+	// ========================================================================== ADMIN
+
+	admin := r.Group("/admin")
+	admin.Use(middleware.AuthMiddleware(), middleware.AdminOnly())
+	{
 		users := admin.Group("/users")
 		{
 			users.GET("", userHandler.GetUsers)
@@ -40,62 +101,19 @@ func Router(r *gin.Engine, container *di.Container) {
 			users.PATCH("/:id", userHandler.UpdateUser)
 			users.DELETE("/:id", userHandler.DeleteUser)
 		}
-		//PRODUCT
 
-	}
-	// =========================================================== FEATURE
+		transaction := admin.Group("/transaction")
+		{
+			transaction.POST("", transactionHandler.CreateTransaction)
+			transaction.PATCH("/:id", transactionHandler.UpdateTransaction)
+			transaction.DELETE("/:id", transactionHandler.DeleteTransaction)
+		}
 
-	product := r.Group("/products")
-	{
-		product.POST("", productHandler.CreateProduct)
-		product.GET("", productHandler.GetProducts)
-		product.GET("/:id", productHandler.GetProductbyID)
-		product.GET("/:id/variants", productHandler.GetVariantByIdProduct)
-		product.GET("/:id/sizes", productHandler.GetSizesByIdProduct)
-	}
-	// Auth
-	auth := r.Group("/auth")
-	{
-		auth.POST("/register", AuthHandler.Register)
-		auth.POST("/login", AuthHandler.Login)
-		auth.POST("/forgot-password", AuthHandler.RequestForgotPwd)
-		auth.PATCH("/reset-password", AuthHandler.ResetPassword)
-	}
-
-	// TRANSACSION
-	transaction := r.Group("/transactions")
-	{
-		transaction.GET("", transactionHandler.GetAllTransactions)
-		transaction.GET("/:id", transactionHandler.GetTransactionbyID)
-		transaction.POST("", transactionHandler.CreateTransaction)
-	}
-
-	//reviews
-	reviewProduct := r.Group("/review-product")
-	{
-		reviewProduct.POST("", reviewProductHandler.CreateReviewProduct)
-		reviewProduct.GET("", reviewProductHandler.GetAllReviewProducts)
-		reviewProduct.GET("/:id", reviewProductHandler.GetReviewProductbyID)
-		reviewProduct.PATCH("/:id", reviewProductHandler.UpdateReviewProduct)
-		reviewProduct.DELETE("/:id", reviewProductHandler.DeleteReviewProduct)
-	}
-
-	// Landing
-	landing := r.Group("landing")
-	{
-		landing.GET("/reviews", landingHandler.GetAllReviewProducts)
-		landing.GET("/reviews/:id", landingHandler.GetRecommendedProductByID)
-		landing.GET("/recommended-product", landingHandler.GetRecommendedProducts)
-		landing.GET("/recommended-product/:id", landingHandler.GetRecommendedProductByID)
-	}
-
-	// MASTER
-	master := r.Group("master")
-	{
-		master.POST("/:table", masterHandler.Create)
-		master.GET("/:table", masterHandler.GetAll)
-		master.GET("/:table/:id", masterHandler.GetById)
-		master.PATCH("/:table/:id", masterHandler.Update)
-		master.DELETE("/:table/:id", masterHandler.Delete)
+		master := admin.Group("/master")
+		{
+			master.POST("/:table", masterHandler.Create)
+			master.PATCH("/:table/:id", masterHandler.Update)
+			master.DELETE("/:table/:id", masterHandler.Delete)
+		}
 	}
 }
