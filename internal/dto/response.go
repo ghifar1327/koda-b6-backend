@@ -12,6 +12,8 @@ type UserResponse struct {
 	Picture  string    `json:"picture"`
 	FullName string    `json:"full_name"`
 	Email    string    `json:"email"`
+	Phone    string    `json:"phone"`
+	Address  string    `json:"address"`
 	RoleId   int       `json:"role_id"`
 }
 type ResponseToken struct {
@@ -24,5 +26,5 @@ type ResponseToken struct {
 type ResponseWrap struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
-	Results  any    `json:"results"`
+	Results any    `json:"results"`
 }
