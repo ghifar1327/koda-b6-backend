@@ -8,9 +8,7 @@ import (
 
 type Transaction struct {
 	Id               uuid.UUID    `json:"id" db:"id"`
-	FullName         string       `json:"full_name" db:"full_name"`
-	Address          string       `json:"address" db:"address"`
-	Phone            string       `json:"phone" db:"phone"`
+	UserID           uuid.UUID    `json:"user_id" db:"user_id"`
 	Shipping         string       `json:"shipping" db:"shipping"`
 	PaymentMethod    string       `json:"payment_method" db:"payment_method"`
 	Status           string       `json:"status" db:"status"`
@@ -32,9 +30,7 @@ type ItemDetail struct {
 
 type TransactionRow struct {
 	Id            uuid.UUID `json:"id" db:"id"`
-	FullName      string    `json:"full_name" db:"full_name"`
-	Address       string    `json:"address" db:"address"`
-	Phone         string    `json:"phone" db:"phone"`
+	UserId        uuid.UUID `json:"user_id" db:"user_id"`
 	Shipping      string    `json:"shipping" db:"shipping"`
 	PaymentMethod string    `json:"payment_method" db:"payment_method"`
 	Status        string    `json:"status" db:"status"`
