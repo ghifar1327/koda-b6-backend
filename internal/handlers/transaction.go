@@ -64,7 +64,7 @@ func (h *TransactionHandler) GetTransactionbyID(ctx *gin.Context) {
 			Message: "invalid ID",
 		})
 	}
-	Transaction, err := h.service.GetAllTransactionByID(ctx.Request.Context(), id)
+	Transaction, err := h.service.GetTransactionByID(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
 			Success: false,
@@ -78,6 +78,42 @@ func (h *TransactionHandler) GetTransactionbyID(ctx *gin.Context) {
 		Results: Transaction,
 	})
 }
+
+
+// GetAllTransactionsByUserID godoc
+// @Summary Get transaction by ID
+// @Description Retrieve transaction detail by UUID
+// @Tags Transactions
+// @Accept json
+// @Produce json
+// @Param id path string true "Transaction ID (UUID)"
+// @Success 200 {object} models.Transaction
+// @Failure 400 {object} dto.Response
+// @Failure 404 {object} dto.Response
+// @Router /transactions/{id} [get]
+func (h *TransactionHandler) GetAllTransactionsByUserID(ctx *gin.Context) {
+	id, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "invalid ID",
+		})
+	}
+	Transaction, err := h.service.GetAllTransactionsByUserID(ctx.Request.Context(), id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, dto.Response{
+			Success: false,
+			Message: "transaction not found",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "Data of transaction",
+		Results: Transaction,
+	})
+}
+
 
 // CreateTransaction godoc
 // @Summary Create transaction

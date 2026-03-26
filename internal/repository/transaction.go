@@ -39,14 +39,12 @@ func (r *TransactionRepository) GetAllTransaction(ctx context.Context) ([]models
 
 	query := `SELECT
 	t.id,
-	u.full_name,
-	t.address,
-	u.phone,
+	u.id AS user_id,
 	m.name AS shipping,
 	t.payment_method,
 	t.status,
 	t.created_at,
-	t.updeted_at,
+	t.updated_at,
 
 	p.name AS product_name,
 	img.url AS product_image,
@@ -93,9 +91,7 @@ func (r *TransactionRepository) GetAllTransaction(ctx context.Context) ([]models
 		if !exists {
 			trx = &models.Transaction{
 				Id:            r.Id,
-				FullName:      r.FullName,
-				Address:       r.Address,
-				Phone:         r.Phone,
+				UserID:        r.UserId,
 				Shipping:      r.Shipping,
 				PaymentMethod: r.PaymentMethod,
 				Status:        r.Status,
@@ -149,14 +145,12 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 	query := `
 	SELECT
 	t.id,
-	u.full_name,
-	t.address,
-	u.phone,
+	u.id AS user_id,
 	m.name AS shipping,
 	t.payment_method,
 	t.status,
 	t.created_at,
-	t.updeted_at,
+	t.updated_at,
 
 
 	p.name AS product_name,
@@ -201,9 +195,7 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 
 	trx := models.Transaction{
 		Id:            result[0].Id,
-		FullName:      result[0].FullName,
-		Address:       result[0].Address,
-		Phone:         result[0].Phone,
+		UserID:        result[0].UserId,
 		Shipping:      result[0].Shipping,
 		PaymentMethod: result[0].PaymentMethod,
 		Status:        result[0].Status,
@@ -332,4 +324,107 @@ func (r *TransactionRepository) DeleteTransaction(ctx context.Context, id uuid.U
 	_, err := r.db.Exec(ctx, query, id)
 	r.rdb.Del(ctx, fmt.Sprintf("get-transaction-by-id:%s", id.String()))
 	return err
+}
+
+
+// ====================================================================================================================== GET TRANSCTION BY USER ID
+func (r *TransactionRepository) GetTransactionsByUserID(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
+
+	key := fmt.Sprintf("get-transaction-by-user-id:%s", id.String())
+	cached, err := r.rdb.Get(ctx, key).Result()
+	if err == nil {
+		var result models.Transaction
+		if err := json.Unmarshal([]byte(cached), &result); err == nil {
+			return &result, nil
+		}
+	}
+
+	query := `
+	SELECT
+	t.id,
+	u.id AS user_id,
+	m.name AS shipping,
+	t.payment_method,
+	t.status,
+	t.created_at,
+	t.updated_at,
+
+
+	p.name AS product_name,
+	img.url AS product_image,
+	s.name AS size,
+	v.name AS variant,
+	td.quantity,
+
+	(p.price + COALESCE(s.add_price,0) + COALESCE(v.add_price,0)) * td.quantity AS subtotal
+
+	FROM transactions t
+
+	JOIN users u ON u.id = t.user_id
+	JOIN methods m ON m.id = t.id_method
+
+	JOIN transaction_details td ON td.transaction_id = t.id
+	JOIN products p ON p.id = td.product_id
+
+	LEFT JOIN sizes s ON s.id = td.size_id
+	LEFT JOIN variants v ON v.id = td.variant_id
+
+	LEFT JOIN product_images pi ON pi.product_id = p.id
+	LEFT JOIN images img ON img.id = pi.image_id
+
+	WHERE u.id = $1;
+	`
+
+	rows, err := r.db.Query(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result, err := pgx.CollectRows(rows, pgx.RowToStructByName[models.TransactionRow])
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result) == 0 {
+		return nil, err
+	}
+
+	trx := models.Transaction{
+		Id:            result[0].Id,
+		UserID:        result[0].UserId,
+		Shipping:      result[0].Shipping,
+		PaymentMethod: result[0].PaymentMethod,
+		Status:        result[0].Status,
+		CreatedAt:     result[0].CreatedAt,
+		UpdatedAt:     result[0].UpdatedAt,
+	}
+
+	total := 0
+
+	for _, r := range result {
+
+		item := models.ItemDetail{
+			TransactionId: r.Id,
+			ProductName:   r.ProductName,
+			ProductImage:  r.ProductImage,
+			Size:          r.Size,
+			Variant:       r.Variant,
+			Quantity:      r.Quantity,
+			SubTotal:      r.Subtotal,
+		}
+
+		total += r.Subtotal
+
+		trx.Items = append(trx.Items, item)
+	}
+
+	trx.TotalTransaction = total
+
+	data, err := json.Marshal(trx)
+	if err == nil {
+		r.rdb.Set(ctx, key, data, time.Minute*15)
+	}
+
+	return &trx, nil
 }

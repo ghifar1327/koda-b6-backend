@@ -23,8 +23,12 @@ func (s *TransactionService) GetAllTransactions(ctx context.Context) ([]models.T
 	return s.repo.GetAllTransaction(ctx)
 }
 
-func (s *TransactionService) GetAllTransactionByID(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
+func (s *TransactionService) GetTransactionByID(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
 	return s.repo.GetTransactionByID(ctx, id)
+}
+
+func (s *TransactionService) GetAllTransactionsByUserID(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
+	return s.repo.GetTransactionsByUserID(ctx, id)
 }
 
 func (s *TransactionService) CreateTransaction(ctx context.Context, req dto.CreateTransactionRequest) error {
