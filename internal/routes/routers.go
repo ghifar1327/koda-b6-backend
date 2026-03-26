@@ -72,13 +72,15 @@ func Router(r *gin.Engine, container *di.Container) {
 	// ========================================================================= USER (LOGIN REQUIRED)
 
 	user := r.Group("/")
-	user.Use(middleware.AuthMiddleware())
+	// user.Use(middleware.AuthMiddleware())
 	{
 		transaction := user.Group("/transactions")
 		{
 			transaction.POST("", transactionHandler.CreateTransaction)
 			transaction.GET("", transactionHandler.GetAllTransactions)
 			transaction.GET("/:id", transactionHandler.GetTransactionbyID)
+			transaction.GET("/user/:id", transactionHandler.GetAllTransactionsByUserID)
+
 		}
 
 		review := user.Group("/review-product")
