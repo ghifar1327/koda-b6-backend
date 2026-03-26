@@ -7,24 +7,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-
-
-
-
 type User struct {
-	Id        uuid.UUID   `json:"id"`
-	Picture   pgtype.Text `json:"picture"`
-	FullName  string      `json:"full_name"`
-	Email     string      `json:"email"`
-	Password  string      `json:"password"`
-	Address   string      `json:"address"`
-	Phone     string      `json:"phone"`
-	RoleId    int         `json:"role_id"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	Id        uuid.UUID   `json:"id" db:"id"`
+	Picture   pgtype.Text `json:"picture" db:"picture"`
+	FullName  string      `json:"full_name" db:"full_name"`
+	Email     string      `json:"email" db:"email"`
+	Password  string      `json:"password" db:"password"`
+	Address   string      `json:"address" db:"address"`
+	Phone     string      `json:"phone" db:"phone"`
+	RoleId    int         `json:"role_id" db:"role_id"`
+	CreatedAt time.Time   `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at" db:"updated_at"`
 }
-
-
 
 // import (
 // 	"time"
@@ -33,10 +27,7 @@ type User struct {
 // 	"github.com/jackc/pgx/v5/pgtype"
 // )
 
-
 // // ========================================================================= REQUEST
-
-
 
 // type LoginInput struct {
 // 	Email    string `json:"email" binding:"required,email"`
