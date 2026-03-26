@@ -110,6 +110,8 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 			Picture:  user.Picture.String,
 			Email:    user.Email,
 			FullName: user.FullName,
+			Phone:    user.Phone,
+			Address:  user.Address,
 			RoleId:   user.RoleId,
 		},
 	})
@@ -222,6 +224,6 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, dto.Response{
 		Success: true,
-		Message: "Provile updated successfully",
+		Message: "Profile updated successfully",
 	})
 }
