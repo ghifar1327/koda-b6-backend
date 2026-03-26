@@ -4,6 +4,7 @@ import (
 	"backend/internal/models"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -68,8 +69,10 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 
 // ==================================================================================================================================================== Get User By ID
 func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	fmt.Println(id)
 	key := fmt.Sprintf("user:id:%s", id.String())
 
+	// ================= CACHE =================
 	cached, err := r.rdb.Get(ctx, key).Result()
 	if err == nil {
 		var result models.User
@@ -78,6 +81,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 		}
 	}
 
+	// ================= DB =================
 	query := `
 		SELECT 
 			id, 
@@ -87,7 +91,9 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 			password, 
 			address, 
 			phone, 
-			role_id
+			role_id,
+			created_at,
+			updated_at
 		FROM users 
 		WHERE id=$1
 	`
@@ -96,11 +102,18 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
+		// 🔥 ini penting
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("user not found")
+		}
 		return nil, err
 	}
+
+	// ================= CACHE =================
 	data, err := json.Marshal(user)
 	if err == nil {
 		r.rdb.Set(ctx, key, data, time.Minute*15)
