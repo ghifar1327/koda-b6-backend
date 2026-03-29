@@ -27,7 +27,7 @@ func (s *TransactionService) GetTransactionByID(ctx context.Context, id uuid.UUI
 	return s.repo.GetTransactionByID(ctx, id)
 }
 
-func (s *TransactionService) GetAllTransactionsByUserID(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
+func (s *TransactionService) GetAllTransactionsByUserID(ctx context.Context, id uuid.UUID) ([]models.Transaction, error) {
 	return s.repo.GetTransactionsByUserID(ctx, id)
 }
 
