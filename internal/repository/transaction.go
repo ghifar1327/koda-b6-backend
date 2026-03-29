@@ -40,6 +40,9 @@ func (r *TransactionRepository) GetAllTransaction(ctx context.Context) ([]models
 	query := `SELECT
 	t.id,
 	u.id AS user_id,
+	u.full_name,
+	t.address,
+	u.phone,
 	m.name AS shipping,
 	t.payment_method,
 	t.status,
@@ -92,6 +95,9 @@ func (r *TransactionRepository) GetAllTransaction(ctx context.Context) ([]models
 			trx = &models.Transaction{
 				Id:            r.Id,
 				UserID:        r.UserId,
+				FullName:      r.FullName,
+				Address:       r.Address,
+				Phone:         r.Phone,
 				Shipping:      r.Shipping,
 				PaymentMethod: r.PaymentMethod,
 				Status:        r.Status,
@@ -146,6 +152,9 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 	SELECT
 	t.id,
 	u.id AS user_id,
+	u.full_name,
+	t.address,
+	u.phone,
 	m.name AS shipping,
 	t.payment_method,
 	t.status,
@@ -196,6 +205,9 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 	trx := models.Transaction{
 		Id:            result[0].Id,
 		UserID:        result[0].UserId,
+		FullName:      result[0].FullName,
+		Address:       result[0].Address,
+		Phone:         result[0].Phone,
 		Shipping:      result[0].Shipping,
 		PaymentMethod: result[0].PaymentMethod,
 		Status:        result[0].Status,
@@ -326,16 +338,17 @@ func (r *TransactionRepository) DeleteTransaction(ctx context.Context, id uuid.U
 	return err
 }
 
-
 // ====================================================================================================================== GET TRANSCTION BY USER ID
-func (r *TransactionRepository) GetTransactionsByUserID(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
+func (r *TransactionRepository) GetTransactionsByUserID(ctx context.Context, id uuid.UUID) ([]models.Transaction, error) {
 
 	key := fmt.Sprintf("get-transaction-by-user-id:%s", id.String())
+
+	// 🔹 GET CACHE
 	cached, err := r.rdb.Get(ctx, key).Result()
 	if err == nil {
-		var result models.Transaction
+		var result []models.Transaction
 		if err := json.Unmarshal([]byte(cached), &result); err == nil {
-			return &result, nil
+			return result, nil
 		}
 	}
 
@@ -343,12 +356,14 @@ func (r *TransactionRepository) GetTransactionsByUserID(ctx context.Context, id 
 	SELECT
 	t.id,
 	u.id AS user_id,
+	u.full_name,
+	t.address,
+	u.phone,
 	m.name AS shipping,
 	t.payment_method,
 	t.status,
 	t.created_at,
 	t.updated_at,
-
 
 	p.name AS product_name,
 	img.url AS product_image,
@@ -387,22 +402,30 @@ func (r *TransactionRepository) GetTransactionsByUserID(ctx context.Context, id 
 	}
 
 	if len(result) == 0 {
-		return nil, err
+		return []models.Transaction{}, nil
 	}
 
-	trx := models.Transaction{
-		Id:            result[0].Id,
-		UserID:        result[0].UserId,
-		Shipping:      result[0].Shipping,
-		PaymentMethod: result[0].PaymentMethod,
-		Status:        result[0].Status,
-		CreatedAt:     result[0].CreatedAt,
-		UpdatedAt:     result[0].UpdatedAt,
-	}
-
-	total := 0
+	// GROUPING BY TRANSACTION ID
+	trxMap := make(map[uuid.UUID]*models.Transaction)
 
 	for _, r := range result {
+
+		if _, exists := trxMap[r.Id]; !exists {
+			trxMap[r.Id] = &models.Transaction{
+				Id:               r.Id,
+				UserID:           r.UserId,
+				FullName:         r.FullName,
+				Address:          r.Address,
+				Phone:            r.Phone,
+				Shipping:         r.Shipping,
+				PaymentMethod:    r.PaymentMethod,
+				Status:           r.Status,
+				CreatedAt:        r.CreatedAt,
+				UpdatedAt:        r.UpdatedAt,
+				Items:            []models.ItemDetail{},
+				TotalTransaction: 0,
+			}
+		}
 
 		item := models.ItemDetail{
 			TransactionId: r.Id,
@@ -414,17 +437,19 @@ func (r *TransactionRepository) GetTransactionsByUserID(ctx context.Context, id 
 			SubTotal:      r.Subtotal,
 		}
 
-		total += r.Subtotal
-
-		trx.Items = append(trx.Items, item)
+		trxMap[r.Id].Items = append(trxMap[r.Id].Items, item)
+		trxMap[r.Id].TotalTransaction += r.Subtotal
 	}
 
-	trx.TotalTransaction = total
+	var transactions []models.Transaction
+	for _, v := range trxMap {
+		transactions = append(transactions, *v)
+	}
 
-	data, err := json.Marshal(trx)
+	data, err := json.Marshal(transactions)
 	if err == nil {
 		r.rdb.Set(ctx, key, data, time.Minute*15)
 	}
 
-	return &trx, nil
+	return transactions, nil
 }
