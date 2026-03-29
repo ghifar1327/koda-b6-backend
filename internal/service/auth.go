@@ -80,7 +80,7 @@ func (s *AuthService) RequestForgotPwd(ctx context.Context, email string) error 
 	if err != nil {
 		return err
 	}
-	fmt.Println(otp)
+	fmt.Printf("name: %s, otp: %d", user.FullName, otp)
 	newData := models.ForgotPassword{
 		Email: user.Email,
 		Code:  otp,
