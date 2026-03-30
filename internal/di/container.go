@@ -31,6 +31,11 @@ type Container struct {
 	landingService *service.LandingService
 	landingHandler *handlers.LandingHandler
 
+	// CART
+	cartREPO    *repository.CartRepository
+	cartService *service.CartService
+	cartHandler *handlers.CartHandler
+
 	//TRANSACTION
 	transactionRepo    *repository.TransactionRepository
 	transactionService *service.TransactionService
@@ -87,7 +92,12 @@ func (c *Container) initDependencies() {
 	c.landingService = service.NewLandingService(c.landingRepo)
 	c.landingHandler = handlers.NewLandingHandler(c.landingService)
 
-	// TRAMSACTION
+	//CARD
+	c.cartREPO = repository.NewCartRepository(c.db, c.rdb)
+	c.cartService = service.NewCartService(c.cartREPO)
+	c.cartHandler = handlers.NewCartHandler(c.cartService)
+
+	// TRANSACTION
 	c.transactionRepo = repository.NewTransactionRepository(c.db, c.rdb)
 	c.transactionService = service.NewTransactionService(c.transactionRepo)
 	c.transactionHandler = handlers.NewTransactionHandler(c.transactionService)
@@ -120,6 +130,9 @@ func (c *Container) LandingHandler() *handlers.LandingHandler {
 
 func (c *Container) ProductHandler() *handlers.ProductHandler {
 	return c.productHandler
+}
+func (c *Container) CartHandler() *handlers.CartHandler {
+	return c.cartHandler
 }
 func (c *Container) TransactionHandler() *handlers.TransactionHandler {
 	return c.transactionHandler
