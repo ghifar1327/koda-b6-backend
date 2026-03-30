@@ -51,6 +51,8 @@ func (a *AuthService) Register(ctx context.Context, req dto.RegisterRequest) err
 
 func (a AuthService) Login(ctx context.Context, req dto.LoginRequest) (string, error) {
 	user, err := a.userRepo.GetUserByEmail(ctx, req.Email)
+	fmt.Println("INPUT PASSWORD:", req.Password)
+	fmt.Println("HASH DI DB:", user.Password)
 	if err != nil {
 		return "", errors.New("Email not Registered")
 	}
@@ -118,7 +120,7 @@ func (s *AuthService) GetUserBYEmail(ctx context.Context, email string) (*models
 	return s.userRepo.GetUserByEmail(ctx, email)
 }
 
-func (s *AuthService) UpdateProfile(ctx context.Context, id uuid.UUID, req dto.UpdateProfileRequest) error {
+func (s *AuthService) UpdateProfile(ctx context.Context, id uuid.UUID, req dto.UpdateProfileRequest, fileName string) error {
 	user, err := s.userRepo.GetUserByID(ctx, id)
 	if err != nil {
 		return err
@@ -140,5 +142,10 @@ func (s *AuthService) UpdateProfile(ctx context.Context, id uuid.UUID, req dto.U
 		user.Phone = req.Phone
 	}
 
-	return s.authRepo.UpdateProfile(ctx, id, req)
+	if fileName != "" {
+		user.Picture.String = "/uploads/" + fileName
+		user.Picture.Valid = true
+	}
+
+	return s.userRepo.UpdateUser(ctx, id, *user)
 }
