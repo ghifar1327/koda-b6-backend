@@ -4,6 +4,7 @@ import (
 	"backend/internal/dto"
 	"backend/internal/service"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -207,23 +208,50 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 	var req dto.UpdateProfileRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, dto.Response{
-			Success: false,
-			Message: err.Error(),
-		})
-		return
-	}
+	req.FullName = ctx.PostForm("full_name")
+	req.Email = ctx.PostForm("email")
+	req.Address = ctx.PostForm("address")
+	req.Phone = ctx.PostForm("phone")
 
-	if err := h.service.UpdateProfile(ctx.Request.Context(), id, req); err != nil {
-		ctx.JSON(http.StatusNotFound, dto.Response{
-			Success: false,
-			Message: err.Error(),
+	// ambil file
+	file, err := ctx.FormFile("picture")
+
+	var filename string
+
+	if err == nil {
+		// validasi size (1MB)
+		if file.Size > 1*1024*1024 {
+			ctx.JSON(http.StatusBadRequest, dto.Response{
+				Success: false,
+				Message: "file too large (max 2MB)",
+			})
+			return
+		}
+
+		ext := filepath.Ext(file.Filename)
+
+		// rename file
+		filename = uuid.New().String() + ext
+
+		err = ctx.SaveUploadedFile(file, "./uploads/"+filename)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, dto.Response{
+				Success: false,
+				Message: "failed to save file",
+			})
+			return
+		}
+		if err := h.service.UpdateProfile(ctx.Request.Context(), id, req, filename); err != nil {
+			ctx.JSON(http.StatusNotFound, dto.Response{
+				Success: false,
+				Message: err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, dto.Response{
+			Success: true,
+			Message: "Profile updated successfully",
 		})
-		return
 	}
-	ctx.JSON(http.StatusOK, dto.Response{
-		Success: true,
-		Message: "Profile updated successfully",
-	})
 }
