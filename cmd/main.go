@@ -27,7 +27,8 @@ func main() {
 	}
 
 	r := gin.Default()
-
+	    
+	r.Static("/uploads", "./uploads")
 	container := di.NewContainer(pool)
 
 	routes.Router(r, container)
