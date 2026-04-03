@@ -5,17 +5,42 @@ import (
 	"backend/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-type CartHandler struct{
+type CartHandler struct {
 	service *service.CartService
 }
 
-func NewCartHandler(s *service.CartService) *CartHandler{
+func NewCartHandler(s *service.CartService) *CartHandler {
 	return &CartHandler{service: s}
 }
 
+func (h *CartHandler) GetCartByUserId(c *gin.Context) {
+	userId, err := uuid.Parse(c.Param("user_id"))
+	if err != nil {
+		c.JSON(400, dto.Response{
+			Success: false,
+			Message: "Invalid user_id",
+		})
+		return
+	}
 
+	cart, err := h.service.GetCartByUserId(c.Request.Context(), userId)
+	if err != nil {
+		c.JSON(500, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, dto.ResponseWrap{
+		Success: true,
+		Message: "List of cart items",
+		Results: cart,
+	})
+}
 func (h *CartHandler) AddCart(c *gin.Context) {
 	var req dto.ADDCartRequest
 
@@ -42,3 +67,5 @@ func (h *CartHandler) AddCart(c *gin.Context) {
 		Results: res,
 	})
 }
+
+
