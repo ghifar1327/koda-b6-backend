@@ -14,7 +14,6 @@ type CreateTransactionRequest struct {
 	IdMethod      int                 `json:"id_method"`
 	PaymentMethod string              `json:"payment_method"`
 	IdVoucher     *int                `json:"id_voucher"`
-	Items         []CreateItemRequest `json:"items"`
 }
 
 type CreateItemRequest struct {
