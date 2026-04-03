@@ -1,9 +1,12 @@
 package service
 
 import (
-	"context"
 	"backend/internal/dto"
+	"backend/internal/models"
 	"backend/internal/repository"
+	"context"
+
+	"github.com/google/uuid"
 )
 
 type CartService struct {
@@ -28,8 +31,8 @@ func (s *CartService) AddToCart(ctx context.Context, req dto.ADDCartRequest) ([]
 	return s.repo.AddCart(ctx, req)
 }
 
-func (s *CartService) GetCart(ctx context.Context, userID string) ([]dto.ADDCartRequest, error) {
-	return s.repo.GetCartByUser(ctx, userID)
+func (s *CartService) GetCartByUserId(ctx context.Context, userID uuid.UUID) ([]models.Cart, error) {
+	return s.repo.GetCartByUserId(ctx, userID)
 }
 
 func (s *CartService) DeleteCart(ctx context.Context, id int) error {
