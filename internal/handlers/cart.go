@@ -3,6 +3,7 @@ package handlers
 import (
 	"backend/internal/dto"
 	"backend/internal/service"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -21,7 +22,7 @@ func (h *CartHandler) GetCartByUserId(c *gin.Context) {
 	if err != nil {
 		c.JSON(400, dto.Response{
 			Success: false,
-			Message: "Invalid user_id",
+			Message: "Invalid Id",
 		})
 		return
 	}
@@ -52,7 +53,7 @@ func (h *CartHandler) AddCart(c *gin.Context) {
 		return
 	}
 
-	res, err := h.service.AddToCart(c.Request.Context(), req)
+	cart, err := h.service.AddToCart(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(500, dto.Response{
 			Success: false,
@@ -64,8 +65,31 @@ func (h *CartHandler) AddCart(c *gin.Context) {
 	c.JSON(200, dto.ResponseWrap{
 		Success: true,
 		Message: "Add cart successfully",
-		Results: res,
+		Results: cart,
 	})
 }
 
+func (h *CartHandler) DeleteCart(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(400, dto.Response{
+			Success: false,
+			Message: "Invalid Id",
+		})
+		return
+	}
 
+	if err = h.service.DeleteCart(c.Request.Context(), id); err != nil {
+		c.JSON(500, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, dto.Response{
+		Success: true,
+		Message: "Delete cart successfully",
+	})
+
+}
