@@ -26,6 +26,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	userHandler := container.UserHandler()
 	authHandler := container.AuthHandler()
 	productHandler := container.ProductHandler()
+	cartHandelr := container.CartHandler()
 	landingHandler := container.LandingHandler()
 	reviewHandler := container.ReviewProductHandler()
 	transactionHandler := container.TransactionHandler()
@@ -41,6 +42,7 @@ func Router(r *gin.Engine, container *di.Container) {
 		product.GET("/:id/sizes", productHandler.GetSizesByIdProduct)
 	}
 
+	
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", authHandler.Register)
@@ -48,13 +50,13 @@ func Router(r *gin.Engine, container *di.Container) {
 		auth.POST("/forgot-password", authHandler.RequestForgotPwd)
 		auth.PATCH("/reset-password", authHandler.ResetPassword)
 	}
-
+	
 	review := r.Group("/review-product")
 	{
 		review.GET("", reviewHandler.GetAllReviewProducts)
 		review.GET("/:id", reviewHandler.GetReviewProductbyID)
 	}
-
+	
 	landing := r.Group("/landing")
 	{
 		landing.GET("/reviews", landingHandler.GetAllReviewProductsLanding)
@@ -62,15 +64,15 @@ func Router(r *gin.Engine, container *di.Container) {
 		landing.GET("/recommended-product", landingHandler.GetRecommendedProducts)
 		landing.GET("/recommended-product/:id", landingHandler.GetRecommendedProductByID)
 	}
-
+	
 	master := r.Group("/master")
 	{
 		master.GET("/:table", masterHandler.GetAll)
 		master.GET("/:table/:id", masterHandler.GetById)
 	}
-
+	
 	// ========================================================================= USER (LOGIN REQUIRED)
-
+	
 	user := r.Group("/")
 	// user.Use(middleware.AuthMiddleware())
 	{
@@ -82,7 +84,13 @@ func Router(r *gin.Engine, container *di.Container) {
 			transaction.GET("/user/:id", transactionHandler.GetAllTransactionsByUserID)
 
 		}
-
+		cart := user.Group("/cart")
+		{
+			cart.GET("/:user_id", cartHandelr.GetCartByUserId)
+			cart.POST("",cartHandelr.AddCart)
+			cart.DELETE("/:id", cartHandelr.DeleteCart)
+		}
+		
 		review := user.Group("/review-product")
 		{
 			review.POST("", reviewHandler.CreateReviewProduct)
