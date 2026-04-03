@@ -2,8 +2,10 @@ package repository
 
 import (
 	"backend/internal/dto"
+	"backend/internal/models"
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -90,11 +92,23 @@ func (r *CartRepository) UpdateQuantity(ctx context.Context, id int, qty int) ([
 	return data, nil
 }
 
-func (r *CartRepository) GetCartByUser(ctx context.Context, userID string) ([]dto.ADDCartRequest, error) {
+func (r *CartRepository) GetCartByUserId(ctx context.Context, userID uuid.UUID) ([]models.Cart, error) {
 	query := `
-	SELECT id, user_id, product_id, size_id, variant_id, quantity
-	FROM cart
-	WHERE user_id=$1
+	SELECT 
+	 c.id,
+     i.url AS product_image,
+     p.name AS product_name,
+     s.name AS size,
+     v.name AS variant,
+     c.quantity,
+     ((p.price + COALESCE(s.add_price, 0) + COALESCE(v.add_price, 0)) * c.quantity) AS subtotal
+    FROM cart c
+    JOIN products p ON c.product_id = p.id
+    LEFT JOIN sizes s ON c.size_id = s.id
+    LEFT JOIN variants v ON c.variant_id = v.id
+    LEFT JOIN product_images pi ON p.id = pi.product_id
+    LEFT JOIN images i ON pi.image_id = i.id
+    WHERE c.user_id = $1;
 	`
 
 	rows, err := r.db.Query(ctx, query, userID)
@@ -103,7 +117,7 @@ func (r *CartRepository) GetCartByUser(ctx context.Context, userID string) ([]dt
 	}
 	defer rows.Close()
 
-	return pgx.CollectRows(rows, pgx.RowToStructByName[dto.ADDCartRequest])
+	return pgx.CollectRows(rows, pgx.RowToStructByName[models.Cart])
 }
 
 func (r *CartRepository) Delete(ctx context.Context, id int) error {
