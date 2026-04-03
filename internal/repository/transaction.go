@@ -251,7 +251,11 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		}
+	}()
 	IdTransaction := uuid.New()
 
 	query := `INSERT INTO transactions (
@@ -278,8 +282,28 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 	if err != nil {
 		return err
 	}
+	query = `
+		SELECT 
+			product_id,
+			size_id,
+			variant_id,
+			quantity
+		FROM cart WHERE user_id = $1;`
+	rows, err := tx.Query(ctx, query, req.UserId)
+	if err != nil {
+		return err
+	}
 
-	for _, item := range req.Items {
+	items, err := pgx.CollectRows(rows, pgx.RowToStructByName[dto.CreateItemRequest])
+	if err != nil {
+		return err
+	}
+
+	if len(items) == 0 {
+		return errors.New("cart is empty")
+	}
+
+	for _, item := range items {
 		queryDetail := `INSERT INTO transaction_details(
 		transaction_id,
 		product_id,
@@ -315,6 +339,12 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 		if result.RowsAffected() == 0 {
 			return errors.New("Stock not enough")
 		}
+	}
+
+	query = "DELETE FROM cart WHERE user_id = $1"
+	_, err = tx.Exec(ctx, query, req.UserId)
+	if err != nil {
+		return err
 	}
 
 	return tx.Commit(ctx)
