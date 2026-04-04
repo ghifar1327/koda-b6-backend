@@ -111,7 +111,7 @@ func (s *AuthService) ResetPassword(ctx context.Context, req dto.ResetPwdRequest
 	}
 
 	user.Password = newPWD
-	if err := s.userRepo.UpdateUser(ctx, user.Id, *user); err != nil {
+	if err := s.authRepo.UpdatePassword(ctx, user.Id, user.Password); err != nil {
 		return err
 	}
 	return s.authRepo.DeleteForgotPWDByCode(ctx, req.Code)
@@ -120,32 +120,55 @@ func (s *AuthService) GetUserBYEmail(ctx context.Context, email string) (*models
 	return s.userRepo.GetUserByEmail(ctx, email)
 }
 
-func (s *AuthService) UpdateProfile(ctx context.Context, id uuid.UUID, req dto.UpdateProfileRequest, fileName string) error {
+func (s *AuthService) UpdateProfile(ctx context.Context, id uuid.UUID, req dto.UpdateProfileRequest) (models.User, error) {
 	user, err := s.userRepo.GetUserByID(ctx, id)
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
+
 	if strings.TrimSpace(req.FullName) != "" {
 		user.FullName = req.FullName
 	}
 
 	if strings.TrimSpace(req.Email) != "" {
 		if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
-			return errors.New("invalid email format")
+			return models.User{}, errors.New("invalid email format")
 		}
 		user.Email = req.Email
 	}
+
 	if strings.TrimSpace(req.Address) != "" {
 		user.Address = req.Address
 	}
+
 	if strings.TrimSpace(req.Phone) != "" {
 		user.Phone = req.Phone
 	}
 
-	if fileName != "" {
-		user.Picture.String = "/uploads/" + fileName
-		user.Picture.Valid = true
+	newData, err := s.userRepo.UpdateUser(ctx, id, *user)
+	if err != nil {
+		return models.User{}, err
 	}
 
-	return s.userRepo.UpdateUser(ctx, id, *user)
+	return newData, nil
+}
+
+func (s *AuthService) UpdatePicture(ctx context.Context, id uuid.UUID, fileName string) (models.User, error) {
+	user, err := s.userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	if fileName == "" {
+		return models.User{}, errors.New("filename is required")
+	}
+
+	user.Picture = "/uploads/" + fileName
+
+	newData, err := s.userRepo.UpdateUser(ctx, id, *user)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return newData, nil
 }
