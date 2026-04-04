@@ -108,7 +108,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		Token:   token,
 		User: dto.UserResponse{
 			Id:       user.Id,
-			Picture:  user.Picture.String,
+			Picture:  user.Picture,
 			Email:    user.Email,
 			FullName: user.FullName,
 			Phone:    user.Phone,
@@ -207,51 +207,100 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 		})
 		return
 	}
+
 	var req dto.UpdateProfileRequest
-	req.FullName = ctx.PostForm("full_name")
-	req.Email = ctx.PostForm("email")
-	req.Address = ctx.PostForm("address")
-	req.Phone = ctx.PostForm("phone")
-
-	// ambil file
-	file, err := ctx.FormFile("picture")
-
-	var filename string
-
-	if err == nil {
-		// validasi size (1MB)
-		if file.Size > 1*1024*1024 {
-			ctx.JSON(http.StatusBadRequest, dto.Response{
-				Success: false,
-				Message: "file too large (max 2MB)",
-			})
-			return
-		}
-
-		ext := filepath.Ext(file.Filename)
-
-		// rename file
-		filename = uuid.New().String() + ext
-
-		err = ctx.SaveUploadedFile(file, "./uploads/"+filename)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, dto.Response{
-				Success: false,
-				Message: "failed to save file",
-			})
-			return
-		}
-		if err := h.service.UpdateProfile(ctx.Request.Context(), id, req, filename); err != nil {
-			ctx.JSON(http.StatusNotFound, dto.Response{
-				Success: false,
-				Message: err.Error(),
-			})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, dto.Response{
-			Success: true,
-			Message: "Profile updated successfully",
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid request body",
 		})
+		return
 	}
+
+	user, err := h.service.UpdateProfile(ctx.Request.Context(), id, req)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "Profile updated",
+		Results: dto.UserResponse{
+			Id:       user.Id,
+			Picture:  user.Picture,
+			Email:    user.Email,
+			FullName: user.FullName,
+			Phone:    user.Phone,
+			Address:  user.Address,
+			RoleId:   user.RoleId},
+	})
+}
+
+func (h *AuthHandler) UploadPicture(ctx *gin.Context) {
+	idParam := ctx.Param("id")
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Invalid user id",
+		})
+		return
+	}
+
+	file, err := ctx.FormFile("picture")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "Picture is required",
+		})
+		return
+	}
+
+	if file.Size > 1*1024*1024 {
+		ctx.JSON(http.StatusBadRequest, dto.Response{
+			Success: false,
+			Message: "file too large (max 1MB)",
+		})
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	filename := uuid.New().String() + ext
+
+	err = ctx.SaveUploadedFile(file, "./uploads/"+filename)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
+			Success: false,
+			Message: "failed to save file",
+		})
+		return
+	}
+
+	user, err := h.service.UpdatePicture(ctx.Request.Context(), id, filename)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.Response{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "Picture updated",
+		Results: dto.UserResponse{
+			Id:       user.Id,
+			Picture:  user.Picture,
+			Email:    user.Email,
+			FullName: user.FullName,
+			Phone:    user.Phone,
+			Address:  user.Address,
+			RoleId:   user.RoleId,
+		},
+	})
 }
