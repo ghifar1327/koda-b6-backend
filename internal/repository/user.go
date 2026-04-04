@@ -141,7 +141,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, u models.User) error {
 
 // ==================================================================================================================================================== Update User
 
-func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.User) error {
+func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.User) (models.User, error) {
 	query := `
 	    UPDATE users 
 	    SET 
@@ -164,10 +164,16 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.
 		u.RoleId,
 		time.Now(),
 		id)
-
+	if err != nil {
+		return models.User{}, err
+	}
 	r.rdb.Del(ctx, fmt.Sprintf("user:id:%s", id.String()))
 	r.rdb.Del(ctx, fmt.Sprintf("user:email:%s", u.Email))
-	return err
+	user, err := r.GetUserByID(ctx, id)
+	if err != nil {
+		return models.User{}, err
+	}
+	return *user, nil
 }
 
 // ======================================================================================================== DELETE USER
