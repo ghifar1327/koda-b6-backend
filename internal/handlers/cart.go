@@ -79,7 +79,8 @@ func (h *CartHandler) DeleteCart(c *gin.Context) {
 		return
 	}
 
-	if err = h.service.DeleteCart(c.Request.Context(), id); err != nil {
+	items, err := h.service.DeleteCart(c.Request.Context(), id)
+	if err != nil {
 		c.JSON(500, dto.Response{
 			Success: false,
 			Message: err.Error(),
@@ -87,9 +88,10 @@ func (h *CartHandler) DeleteCart(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, dto.Response{
+	c.JSON(200, dto.ResponseWrap{
 		Success: true,
 		Message: "Delete cart successfully",
+		Results: items,
 	})
 
 }
