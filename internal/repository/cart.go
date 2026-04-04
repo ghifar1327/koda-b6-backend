@@ -120,7 +120,24 @@ func (r *CartRepository) GetCartByUserId(ctx context.Context, userID uuid.UUID) 
 	return pgx.CollectRows(rows, pgx.RowToStructByName[models.Cart])
 }
 
-func (r *CartRepository) Delete(ctx context.Context, id int) error {
-	_, err := r.db.Exec(ctx, `DELETE FROM cart WHERE id=$1`, id)
-	return err
+func (r *CartRepository) Delete(ctx context.Context, id int) ([]models.Cart, error) {
+	var userID uuid.UUID
+
+	err := r.db.QueryRow(ctx,
+		`SELECT user_id FROM cart WHERE id = $1`,
+		id,
+	).Scan(&userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.db.Exec(ctx,
+		`DELETE FROM cart WHERE id = $1`,
+		id,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return r.GetCartByUserId(ctx, userID)
 }
