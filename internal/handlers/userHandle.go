@@ -3,6 +3,7 @@ package handlers
 import (
 	"backend/internal/dto"
 	"backend/internal/service"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -122,16 +123,19 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.service.UpdateUser(ctx.Request.Context(), id, req); err != nil {
+	user ,err := h.service.UpdateUser(ctx.Request.Context(), id, req); 
+	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
 			Success: false,
 			Message: err.Error(),
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, dto.Response{
+	fmt.Println(user)
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
 		Success: true,
 		Message: "User updated successfully",
+		Results: user,
 	})
 }
 
