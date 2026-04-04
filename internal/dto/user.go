@@ -14,7 +14,7 @@ type UpdateUsersRequest struct {
 	RoleId   int    `json:"role_id"`
 }
 
-type AuthResponse struct {
+type userResponse struct {
 	Id       uuid.UUID `json:"id"`
 	Picture  string    `json:"picture"`
 	FullName string    `json:"full_name"`
