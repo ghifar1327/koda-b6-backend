@@ -43,14 +43,14 @@ func (s *UserService) ReadByIdUser(ctx context.Context, id uuid.UUID) (*models.U
 	return s.repo.GetUserByID(ctx, id)
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, id uuid.UUID, req dto.UpdateUsersRequest) error {
+func (s *UserService) UpdateUser(ctx context.Context, id uuid.UUID, req dto.UpdateUsersRequest) (models.User , error) {
 	user, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {
-		return err
+		return models.User{},err
 	}
 
 	if strings.TrimSpace(req.Picture) != "" {
-		user.Picture.String = req.Picture
+		user.Picture = req.Picture
 	}
 
 	if strings.TrimSpace(req.FullName) != "" {
@@ -59,14 +59,14 @@ func (s *UserService) UpdateUser(ctx context.Context, id uuid.UUID, req dto.Upda
 
 	if strings.TrimSpace(req.Email) != "" {
 		if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
-			return errors.New("invalid email format")
+			return models.User{} ,errors.New("invalid email format")
 		}
 		user.Email = req.Email
 	}
 	if strings.TrimSpace(req.Password) != "" && len(req.Password) > 5 {
 		newPwd, err := utils.HashPassword(req.Password)
 		if err != nil {
-			return errors.New("password must be at least 5 characters")
+			return models.User{}, errors.New("password must be at least 5 characters")
 		}
 		user.Password = newPwd
 	}
@@ -79,12 +79,16 @@ func (s *UserService) UpdateUser(ctx context.Context, id uuid.UUID, req dto.Upda
 
 	if req.RoleId != 0 {
 		if req.RoleId != 1 && req.RoleId != 2 {
-			return errors.New("invalid role_id")
+			return models.User{}, errors.New("invalid role_id")
 		}
 		user.RoleId = req.RoleId
 	}
+	newData , err := s.repo.UpdateUser(ctx, id, *user)
+	if err != nil {
+		return models.User{}, err
+	}
 
-	return s.repo.UpdateUser(ctx, id, *user)
+	return newData, err
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) error {
