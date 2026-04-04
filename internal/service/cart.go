@@ -35,6 +35,6 @@ func (s *CartService) GetCartByUserId(ctx context.Context, userID uuid.UUID) ([]
 	return s.repo.GetCartByUserId(ctx, userID)
 }
 
-func (s *CartService) DeleteCart(ctx context.Context, id int) error {
+func (s *CartService) DeleteCart(ctx context.Context, id int) ([]models.Cart ,error) {
 	return s.repo.Delete(ctx, id)
 }
