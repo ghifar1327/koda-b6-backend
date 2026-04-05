@@ -43,6 +43,8 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 		  p.description,
 		  p.price,
 		  ARRAY_AGG(DISTINCT c.name) AS categories,
+		  ARRAY_AGG(DISTINCT s.name) AS sizes,
+		  ARRAY_AGG(DISTINCT v.name) AS variants,
 		  COALESCE(AVG(rp.rating), 0) AS rating,
 		  p.stock,
 		  p.created_at,
@@ -56,6 +58,20 @@ func (r *ProductRepository) GetAllProducts(ctx context.Context) ([]models.Produc
 			ON p.id = pc.product_id
 		LEFT JOIN categories c 
 			ON pc.category_id = c.id
+
+
+		LEFT JOIN product_sizes ps
+			ON p.id = ps.product_id
+		LEFT JOIN sizes s
+			ON s.id = ps.size_id
+
+
+		LEFT JOIN product_variants pv
+			ON p.id = pv.product_id
+		LEFT JOIN variants v
+			ON v.id = pv.variant_id
+
+
 		LEFT JOIN transaction_details td 
 			ON p.id = td.product_id
 		LEFT JOIN review_product rp 
@@ -97,6 +113,8 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 		  p.description,
 		  p.price,
 		  ARRAY_AGG(DISTINCT c.name) AS categories,
+		  ARRAY_AGG(DISTINCT s.name) AS sizes,
+		  ARRAY_AGG(DISTINCT v.name) AS variants,
 		  COALESCE(AVG(rp.rating), 0) AS rating,
 		  p.stock,
 		  p.created_at,
@@ -110,6 +128,20 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 			ON p.id = pc.product_id
 		LEFT JOIN categories c 
 			ON pc.category_id = c.id
+
+
+		LEFT JOIN product_sizes ps
+			ON p.id = ps.product_id
+		LEFT JOIN sizes s
+			ON s.id = ps.size_id
+
+
+		LEFT JOIN product_variants pv
+			ON p.id = pv.product_id
+		LEFT JOIN variants v
+			ON v.id = pv.variant_id
+
+
 		LEFT JOIN transaction_details td 
 			ON p.id = td.product_id
 		LEFT JOIN review_product rp 
