@@ -13,6 +13,8 @@ type Product struct {
 	Description string    `json:"description" db:"description"`
 	Price       int       `json:"price" db:"price"`
 	Categories  []string  `json:"categories" db:"categories"`
+	Sizes       []string  `json:"sizes" db:"sizes"`
+	Variants    []string  `json:"variants" db:"variants"`
 	Rating      float64   `json:"rating" db:"rating"`
 	Stock       int       `json:"stock" db:"stock"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
