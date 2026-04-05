@@ -41,7 +41,7 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 		SELECT 
 			id, 
 			full_name, 
-			picture, 
+			COALESCE(picture, '') AS picture, 
 			email,
 			password,
 			role_id, 
@@ -85,7 +85,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 	query := `
 		SELECT 
 			id, 
-			picture, 
+			COALESCE(picture, '') AS picture, 
 			full_name, 
 			email, 
 			password, 
@@ -106,7 +106,6 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 
 	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[models.User])
 	if err != nil {
-		// 🔥 ini penting
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("user not found")
 		}
