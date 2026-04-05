@@ -52,7 +52,7 @@ func (r *AuthRepository) GetForgotPWDByEmail(ctx context.Context, email string) 
 }
 
 func (r *AuthRepository) UpdatePassword(ctx context.Context, id uuid.UUID, newPassword string) error {
-	query := `UPADATE users SET password = $1 WHERE is = 2`
+	query := `UPDATE users SET password = $1 WHERE id = $2`
 	_, err := r.db.Exec(ctx, query, newPassword, id)
 	return err
 }
