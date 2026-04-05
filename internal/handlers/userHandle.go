@@ -34,6 +34,7 @@ func (h *UserHandler) GetUsers(ctx *gin.Context) {
 	users, err := h.service.ReadAllUser(ctx.Request.Context())
 
 	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -43,12 +44,20 @@ func (h *UserHandler) GetUsers(ctx *gin.Context) {
 	for _, user := range users {
 		responses = append(responses, dto.UserResponse{
 			Id:       user.Id,
+			Picture:  user.Picture,
 			FullName: user.FullName,
 			Email:    user.Email,
+			Phone:    user.Phone,
+			Address:  user.Address,
+			RoleId:   user.RoleId,
 		})
 	}
 
-	ctx.JSON(http.StatusOK, responses)
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "list of users",
+		Results: responses,
+	})
 }
 
 // ==================================================================== get user by id
@@ -83,10 +92,18 @@ func (h *UserHandler) GetUserById(ctx *gin.Context) {
 	}
 	result := dto.UserResponse{
 		Id:       user.Id,
+		Picture:  user.Picture,
 		FullName: user.FullName,
 		Email:    user.Email,
+		Phone:    user.Phone,
+		Address:  user.Address,
+		RoleId:   user.RoleId,
 	}
-	ctx.JSON(http.StatusOK, result)
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "user data",
+		Results: result,
+	})
 }
 
 // =============================================================================== Update User
@@ -123,7 +140,7 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	user ,err := h.service.UpdateUser(ctx.Request.Context(), id, req); 
+	user, err := h.service.UpdateUser(ctx.Request.Context(), id, req)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, dto.Response{
 			Success: false,
