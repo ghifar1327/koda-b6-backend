@@ -74,7 +74,7 @@ func Router(r *gin.Engine, container *di.Container) {
 	// ========================================================================= USER (LOGIN REQUIRED)
 	
 	user := r.Group("/")
-	// user.Use(middleware.AuthMiddleware())
+	user.Use(middleware.AuthMiddleware())
 	{
 		transaction := user.Group("/transactions")
 		{
@@ -100,6 +100,7 @@ func Router(r *gin.Engine, container *di.Container) {
 		auth := r.Group("/auth")
 		{
 			auth.PATCH("/:id/update", authHandler.UpdateProfile)
+			auth.PATCH("/:id/picture", authHandler.UploadPicture)
 		}
 	}
 
@@ -118,6 +119,7 @@ func Router(r *gin.Engine, container *di.Container) {
 
 		transaction := admin.Group("/transaction")
 		{
+			transaction.GET("", transactionHandler.GetAllTransactions)
 			transaction.PATCH("/:id", transactionHandler.UpdateTransaction)
 			transaction.DELETE("/:id", transactionHandler.DeleteTransaction)
 		}
