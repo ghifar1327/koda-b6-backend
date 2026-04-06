@@ -197,7 +197,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 		SELECT 
 			id,
 			full_name,
-			picture,
+			COALESCE(picture, '') AS picture, 
 			email,
 			password,
 			role_id,
