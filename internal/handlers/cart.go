@@ -53,6 +53,26 @@ func (h *CartHandler) AddCart(c *gin.Context) {
 		return
 	}
 
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(401, dto.Response{
+			Success: false,
+			Message: "User not authenticated",
+		})
+		return
+	}
+
+	userID, ok := userIDValue.(uuid.UUID)
+	if !ok {
+		c.JSON(500, dto.Response{
+			Success: false,
+			Message: "Invalid authenticated user",
+		})
+		return
+	}
+
+	req.UserID = userID
+
 	cart, err := h.service.AddToCart(c.Request.Context(), req)
 	if err != nil {
 		c.JSON(500, dto.Response{
