@@ -3,7 +3,6 @@ package middleware
 import (
 	"backend/internal/dto"
 	"backend/internal/utils"
-	"log"
 	"net/http"
 	"strings"
 
@@ -35,9 +34,6 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-		log.Println("AUTH HEADER:", authHeader)
-		log.Println("TOKEN:", tokenString)
-		
 		claims, err := utils.VerifyToken(tokenString)
 		if err != nil {
 			ctx.JSON(http.StatusUnauthorized, dto.Response{
