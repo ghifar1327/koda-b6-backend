@@ -165,7 +165,7 @@ func (s *AuthService) UpdatePicture(ctx context.Context, id uuid.UUID, fileName 
 
 	user.Picture = "/uploads/" + fileName
 
-	newData, err := s.userRepo.UpdateUser(ctx, id, *user)
+	newData, err := s.userRepo.UpdateUserPicture(ctx, id, user.Picture)
 	if err != nil {
 		return models.User{}, err
 	}
