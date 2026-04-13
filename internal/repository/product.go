@@ -158,6 +158,8 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id int) (*models
 	if err != nil {
 		return nil, err
 	}
+	data, _ := json.Marshal(product)
+    r.rdb.Set(ctx, key, data, 15*time.Minute)
 
 	return &product, nil
 }
