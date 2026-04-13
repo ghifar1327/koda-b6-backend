@@ -292,7 +292,8 @@ func (h *AuthHandler) UploadPicture(ctx *gin.Context) {
 		return
 	}
 
-	user.Picture = os.Getenv("BACKEND_URL") + filename
+	user.Picture = os.Getenv("BACKEND_URL") + user.Picture
+
 	ctx.JSON(http.StatusOK, dto.ResponseWrap{
 		Success: true,
 		Message: "Picture updated",
