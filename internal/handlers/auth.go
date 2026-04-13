@@ -4,6 +4,7 @@ import (
 	"backend/internal/dto"
 	"backend/internal/service"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -102,6 +103,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		})
 		return
 	}
+	user.Picture = os.Getenv("BACKEND_URL") + "/uploads/" + user.Picture
 	ctx.JSON(http.StatusOK, dto.ResponseToken{
 		Success: true,
 		Message: "Login Success",
@@ -225,7 +227,7 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 		})
 		return
 	}
-
+	user.Picture = os.Getenv("BACKEND_URL") + "/uploads/" + user.Picture
 	ctx.JSON(http.StatusOK, dto.ResponseWrap{
 		Success: true,
 		Message: "Profile updated",
@@ -290,6 +292,7 @@ func (h *AuthHandler) UploadPicture(ctx *gin.Context) {
 		return
 	}
 
+	user.Picture = os.Getenv("BACKEND_URL") + "/uploads/" + filename
 	ctx.JSON(http.StatusOK, dto.ResponseWrap{
 		Success: true,
 		Message: "Picture updated",
