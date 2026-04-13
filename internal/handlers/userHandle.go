@@ -43,7 +43,7 @@ func (h *UserHandler) GetUsers(ctx *gin.Context) {
 	var responses []dto.UserResponse
 
 	for _, user := range users {
-		user.Picture = os.Getenv("BACKEND_URL") + "/uploads/" + user.Picture
+		user.Picture = os.Getenv("BACKEND_URL") + user.Picture
 		responses = append(responses, dto.UserResponse{
 			Id:       user.Id,
 			Picture:  user.Picture,
@@ -92,7 +92,7 @@ func (h *UserHandler) GetUserById(ctx *gin.Context) {
 		})
 		return
 	}
-	user.Picture = os.Getenv("BACKEND_URL") + "/uploads/" + user.Picture
+	user.Picture = os.Getenv("BACKEND_URL") + user.Picture
 	result := dto.UserResponse{
 		Id:       user.Id,
 		Picture:  user.Picture,
@@ -151,7 +151,7 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 		})
 		return
 	}
-	user.Picture = os.Getenv("BACKEND_URL") + "/uploads/" + user.Picture
+	user.Picture = os.Getenv("BACKEND_URL") + user.Picture
 	fmt.Println(user)
 	ctx.JSON(http.StatusOK, dto.ResponseWrap{
 		Success: true,
