@@ -247,6 +247,7 @@ func (r *TransactionRepository) GetTransactionByID(ctx context.Context, id uuid.
 // ====================================================================================================================================================  Create Transaction
 
 func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.CreateTransactionRequest) error {
+
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -347,6 +348,9 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 		return err
 	}
 
+	r.rdb.Del(ctx, "get-all-transaction")
+	r.rdb.Del(ctx, fmt.Sprintf("get-transaction-by-user-id:%s", req.UserId))
+
 	return tx.Commit(ctx)
 }
 
@@ -354,8 +358,9 @@ func (r *TransactionRepository) CreateTransaction(ctx context.Context, req dto.C
 
 func (r *TransactionRepository) UpdateTransaction(ctx context.Context, id uuid.UUID, status string) error {
 	query := `
-	    UPDATE Transactions SET status=$1 ,updated_at = $2, WHERE id = $3`
+	    UPDATE Transactions SET status=$1, updated_at=$2 WHERE id=$3`
 	_, err := r.db.Exec(ctx, query, status, time.Now(), id)
+	r.rdb.Del(ctx, "get-all-transaction")
 	r.rdb.Del(ctx, fmt.Sprintf("get-transaction-by-id:%s", id.String()))
 	return err
 }
@@ -364,6 +369,7 @@ func (r *TransactionRepository) UpdateTransaction(ctx context.Context, id uuid.U
 func (r *TransactionRepository) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM Transactions WHERE id=$1`
 	_, err := r.db.Exec(ctx, query, id)
+	r.rdb.Del(ctx, "get-all-transaction")
 	r.rdb.Del(ctx, fmt.Sprintf("get-transaction-by-id:%s", id.String()))
 	return err
 }
