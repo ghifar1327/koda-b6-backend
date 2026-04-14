@@ -72,7 +72,11 @@ func (h *ReviewProductHandler) GetAllReviewProducts(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(200, ReviewProducts)
+	ctx.JSON(200, dto.ResponseWrap{
+		Success: true,
+		Message: "List of review products",
+		Results: ReviewProducts,
+	})
 }
 
 //================================================================================================== Get review product by id
@@ -100,7 +104,11 @@ func (h *ReviewProductHandler) GetReviewProductbyID(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, ReviewProduct)
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "ReviewProduct found",
+		Results: ReviewProduct,
+	})
 }
 
 //================================================================================================== Update review Product

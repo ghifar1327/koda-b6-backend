@@ -26,7 +26,7 @@ func NewLandingHandler(s *service.LandingService) *LandingHandler {
 // @Tags Landing
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.ReviewProduct
+// @Success 200 {array} dto.ResponseWrap
 // @Failure 500 {object} dto.Response
 // @Router /reviews [get]
 func (h *LandingHandler) GetAllReviewProductsLanding(ctx *gin.Context) {
@@ -37,7 +37,11 @@ func (h *LandingHandler) GetAllReviewProductsLanding(ctx *gin.Context) {
 			Message: err.Error()})
 		return
 	}
-	ctx.JSON(200, products)
+	ctx.JSON(200, dto.ResponseWrap{
+		Success: true,
+		Message: "List of review products",
+		Results: products,
+	})
 }
 
 
@@ -48,7 +52,7 @@ func (h *LandingHandler) GetAllReviewProductsLanding(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Review Product ID"
-// @Success 200 {object} models.ReviewProduct
+// @Success 200 {object} dto.ResponseWrap
 // @Failure 400 {object} dto.Response
 // @Failure 404 {object} dto.Response
 // @Router /reviews/{id} [get]
@@ -66,7 +70,11 @@ func (h *LandingHandler) GetReviewProductLandingByID(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, product)
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "ReviewProduct found",
+		Results: product,
+	})
 }
 
 
@@ -76,7 +84,7 @@ func (h *LandingHandler) GetReviewProductLandingByID(ctx *gin.Context) {
 // @Tags Landing
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.Product
+// @Success 200 {array} dto.ResponseWrap
 // @Failure 500 {object} dto.Response
 // @Router /recommended-product [get]
 func (h *LandingHandler) GetRecommendedProducts(ctx *gin.Context) {
@@ -87,7 +95,11 @@ func (h *LandingHandler) GetRecommendedProducts(ctx *gin.Context) {
 			Message: err.Error()})
 		return
 	}
-	ctx.JSON(200, products)
+	ctx.JSON(200, dto.ResponseWrap{
+		Success: true,
+		Message: "List of recommended products",
+		Results: products,
+	})
 }
 
 
@@ -98,7 +110,7 @@ func (h *LandingHandler) GetRecommendedProducts(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Product ID"
-// @Success 200 {object} models.Product
+// @Success 200 {object} dto.ResponseWrap
 // @Failure 400 {object} dto.Response
 // @Failure 404 {object} dto.Response
 // @Router /recommended-product/{id} [get]
@@ -115,5 +127,9 @@ func (h *LandingHandler) GetRecommendedProductByID(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, product)
+	ctx.JSON(http.StatusOK, dto.ResponseWrap{
+		Success: true,
+		Message: "Recommended product found",
+		Results: product,
+	})
 }
