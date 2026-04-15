@@ -51,7 +51,7 @@ func (h *UserHandler) GetUsers(ctx *gin.Context) {
 			Email:    user.Email,
 			Phone:    user.Phone,
 			Address:  user.Address,
-			RoleId:   user.RoleId,
+			Role:     user.Role,
 		})
 	}
 
@@ -100,7 +100,7 @@ func (h *UserHandler) GetUserById(ctx *gin.Context) {
 		Email:    user.Email,
 		Phone:    user.Phone,
 		Address:  user.Address,
-		RoleId:   user.RoleId,
+		Role:     user.Role,
 	}
 	ctx.JSON(http.StatusOK, dto.ResponseWrap{
 		Success: true,
