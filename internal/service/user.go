@@ -77,11 +77,8 @@ func (s *UserService) UpdateUser(ctx context.Context, id uuid.UUID, req dto.Upda
 		user.Phone = req.Phone
 	}
 
-	if req.RoleId != 0 {
-		if req.RoleId != 1 && req.RoleId != 2 {
-			return models.User{}, errors.New("invalid role_id")
-		}
-		user.RoleId = req.RoleId
+	if strings.TrimSpace(req.Role) != "" {
+		user.Role = req.Role
 	}
 	newData , err := s.repo.UpdateUser(ctx, id, *user)
 	if err != nil {
