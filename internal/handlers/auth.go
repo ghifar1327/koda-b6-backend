@@ -13,11 +13,12 @@ import (
 )
 
 type AuthHandler struct {
-	service *service.AuthService
+	authService *service.AuthService
+	userService *service.UserService
 }
 
-func NewAuthHandler(s *service.AuthService) *AuthHandler {
-	return &AuthHandler{service: s}
+func NewAuthHandler(as *service.AuthService, us *service.UserService) *AuthHandler {
+	return &AuthHandler{authService: as, userService: us}
 }
 
 // ==================================================================== register
@@ -43,7 +44,7 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	err := h.service.Register(ctx, req)
+	err := h.authService.Register(ctx, req)
 	if err != nil {
 
 		if pgErr, ok := err.(*pgconn.PgError); ok {
@@ -87,7 +88,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetUserBYEmail(ctx.Request.Context(), req.Email)
+	user, err := h.authService.GetUserBYEmail(ctx.Request.Context(), req.Email)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, dto.Response{
 			Success: false,
@@ -95,7 +96,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		})
 		return
 	}
-	token, err := h.service.Login(ctx.Request.Context(), req)
+	token, err := h.authService.Login(ctx.Request.Context(), req)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, dto.Response{
 			Success: false,
@@ -115,7 +116,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 			FullName: user.FullName,
 			Phone:    user.Phone,
 			Address:  user.Address,
-			RoleId:   user.RoleId,
+			Role:     user.Role,
 		},
 	})
 }
@@ -140,7 +141,7 @@ func (h *AuthHandler) RequestForgotPwd(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.service.RequestForgotPwd(ctx.Request.Context(), req.Email); err != nil {
+	if err := h.authService.RequestForgotPwd(ctx.Request.Context(), req.Email); err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success: false,
 			Message: err.Error(),
@@ -172,7 +173,7 @@ func (h *AuthHandler) ResetPassword(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := h.service.ResetPassword(ctx.Request.Context(), req); err != nil {
+	if err := h.authService.ResetPassword(ctx.Request.Context(), req); err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
 			Message: err.Error(),
@@ -210,7 +211,7 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 
-	var req dto.UpdateProfileRequest
+	var req dto.UpdateUsersRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, dto.Response{
 			Success: false,
@@ -219,7 +220,7 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 		return
 	}
 
-	user, err := h.service.UpdateProfile(ctx.Request.Context(), id, req)
+	user, err := h.userService.UpdateUser(ctx.Request.Context(), id, req)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success: false,
@@ -238,7 +239,7 @@ func (h *AuthHandler) UpdateProfile(ctx *gin.Context) {
 			FullName: user.FullName,
 			Phone:    user.Phone,
 			Address:  user.Address,
-			RoleId:   user.RoleId},
+			Role:     user.Role},
 	})
 }
 
@@ -283,7 +284,7 @@ func (h *AuthHandler) UploadPicture(ctx *gin.Context) {
 		return
 	}
 
-	user, err := h.service.UpdatePicture(ctx.Request.Context(), id, filename)
+	user, err := h.authService.UpdatePicture(ctx.Request.Context(), id, filename)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, dto.Response{
 			Success: false,
@@ -304,7 +305,7 @@ func (h *AuthHandler) UploadPicture(ctx *gin.Context) {
 			FullName: user.FullName,
 			Phone:    user.Phone,
 			Address:  user.Address,
-			RoleId:   user.RoleId,
+			Role:     user.Role,
 		},
 	})
 }
