@@ -14,7 +14,7 @@ type User struct {
 	Password  string    `json:"password" db:"password"`
 	Address   string    `json:"address" db:"address"`
 	Phone     string    `json:"phone" db:"phone"`
-	RoleId    int       `json:"role_id" db:"role_id"`
+	Role   string       `json:"role" db:"role"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

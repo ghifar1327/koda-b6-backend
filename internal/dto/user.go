@@ -7,5 +7,5 @@ type UpdateUsersRequest struct {
 	Password string `json:"password"`
 	Address  string `json:"address"`
 	Phone    string `json:"phone"`
-	RoleId   int    `json:"role_id"`
+	Role     string `json:"role"`
 }

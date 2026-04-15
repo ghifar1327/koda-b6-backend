@@ -14,7 +14,7 @@ type UserResponse struct {
 	Email    string    `json:"email"`
 	Phone    string    `json:"phone"`
 	Address  string    `json:"address"`
-	RoleId   int       `json:"role_id"`
+	Role     string    `json:"role"`
 }
 type ResponseToken struct {
 	Success bool         `json:"success"`
