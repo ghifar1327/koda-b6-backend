@@ -175,6 +175,24 @@ func (r *UserRepository) CreateUser(ctx context.Context, u models.User) error {
 // ==================================================================================================================================================== Update User
 
 func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.User) (models.User, error) {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return models.User{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	// get role_id from role name
+	var roleID int
+	err = tx.QueryRow(ctx,
+		`SELECT id FROM roles WHERE name = $1`,
+		u.Role,
+	).Scan(&roleID)
+
+	if err != nil {
+		return models.User{}, fmt.Errorf("role '%s' not found: %w", u.Role, err)
+	}
+
+	// update user
 	query := `
 	    UPDATE users 
 	    SET 
@@ -186,26 +204,39 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.
 	    	phone=$6, 
 	    	role_id=$7,
 	    	updated_at=$8 
-	    WHERE id=$9`
-	_, err := r.db.Exec(ctx, query,
+	    WHERE id=$9
+	`
+	_, err = tx.Exec(ctx, query,
 		u.Picture,
 		u.FullName,
 		u.Email,
 		u.Password,
 		u.Address,
 		u.Phone,
-		u.Role,
+		roleID,
 		time.Now(),
-		id)
+		id,
+	)
+
 	if err != nil {
 		return models.User{}, err
 	}
+
+	// commit
+	if err := tx.Commit(ctx); err != nil {
+		return models.User{}, err
+	}
+
+	// invalidate cache
 	r.rdb.Del(ctx, fmt.Sprintf("user:id:%s", id.String()))
 	r.rdb.Del(ctx, fmt.Sprintf("user:email:%s", u.Email))
+
+	// get updated user
 	user, err := r.GetUserByID(ctx, id)
 	if err != nil {
 		return models.User{}, err
 	}
+
 	return *user, nil
 }
 
