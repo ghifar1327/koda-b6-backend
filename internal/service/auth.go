@@ -8,7 +8,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -40,7 +39,7 @@ func (a *AuthService) Register(ctx context.Context, req dto.RegisterRequest) err
 		Email:     req.Email,
 		Password:  hash,
 		FullName:  req.FullName,
-		RoleId:    2,
+		Role:      "user",
 		Address:   req.Address,
 		Phone:     req.Phone,
 		CreatedAt: time.Now(),
@@ -120,38 +119,6 @@ func (s *AuthService) GetUserBYEmail(ctx context.Context, email string) (*models
 	return s.userRepo.GetUserByEmail(ctx, email)
 }
 
-func (s *AuthService) UpdateProfile(ctx context.Context, id uuid.UUID, req dto.UpdateProfileRequest) (models.User, error) {
-	user, err := s.userRepo.GetUserByID(ctx, id)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	if strings.TrimSpace(req.FullName) != "" {
-		user.FullName = req.FullName
-	}
-
-	if strings.TrimSpace(req.Email) != "" {
-		if !strings.Contains(req.Email, "@") || !strings.Contains(req.Email, ".") {
-			return models.User{}, errors.New("invalid email format")
-		}
-		user.Email = req.Email
-	}
-
-	if strings.TrimSpace(req.Address) != "" {
-		user.Address = req.Address
-	}
-
-	if strings.TrimSpace(req.Phone) != "" {
-		user.Phone = req.Phone
-	}
-
-	newData, err := s.userRepo.UpdateUser(ctx, id, *user)
-	if err != nil {
-		return models.User{}, err
-	}
-
-	return newData, nil
-}
 
 func (s *AuthService) UpdatePicture(ctx context.Context, id uuid.UUID, fileName string) (models.User, error) {
 	user, err := s.userRepo.GetUserByID(ctx, id)
