@@ -125,18 +125,51 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 // ====================================================================================================================================================  Create User
 
 func (r *UserRepository) CreateUser(ctx context.Context, u models.User) error {
-	query := `INSERT INTO users (id, full_name, email, password, address, phone, role_id,created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-	_, err := r.db.Exec(ctx, query,
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// get role_id from role name
+	var roleID int
+	err = tx.QueryRow(ctx,
+		`SELECT id FROM roles WHERE name = $1`,
+		u.Role,
+	).Scan(&roleID)
+
+	if err != nil {
+		return fmt.Errorf("role '%s' not found: %w", u.Role, err)
+	}
+
+	// insert nuew user
+	query := `
+		INSERT INTO users 
+		(id, full_name, email, password, address, phone, role_id, created_at) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`
+
+	_, err = tx.Exec(ctx, query,
 		u.Id,
 		u.FullName,
 		u.Email,
 		u.Password,
 		u.Address,
 		u.Phone,
-		u.Role,
-		u.CreatedAt)
+		roleID,
+		u.CreatedAt,
+	)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	// 
+	if err := tx.Commit(ctx); err != nil {
+		return err
+	}
+	r.rdb.Del(ctx, "users")
+	return nil
 }
 
 // ==================================================================================================================================================== Update User
