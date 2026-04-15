@@ -85,7 +85,7 @@ func (c *Container) initDependencies() {
 	//AUTH
 	c.fpRepo = repository.NewAuthRepository(c.db, c.rdb)
 	c.fpService = service.NewAuthService(c.userRepo, c.fpRepo)
-	c.authHandler = handlers.NewAuthHandler(c.fpService)
+	c.authHandler = handlers.NewAuthHandler(c.fpService, c.userService)
 
 	//LANDING
 	c.landingRepo = repository.NewLandingRepository(c.db, c.rdb)
