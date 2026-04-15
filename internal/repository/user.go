@@ -39,16 +39,17 @@ func (r *UserRepository) GetAllUser(ctx context.Context) ([]models.User, error) 
 
 	query := `
 		SELECT 
-			id, 
-			full_name, 
-			COALESCE(picture, '') AS picture, 
-			email,
-			password,
-			role_id, 
-			phone, 
-			address, 
-			created_at, 
-			updated_at FROM users`
+     		u.id, 
+     		u.full_name, 
+     		COALESCE(u.picture, '') AS picture, 
+     		u.email,
+     		u.password,
+     		r.name as role, 
+     		u.phone, 
+     		u.address, 
+     		u.created_at, 
+     		u.updated_at FROM users u
+        JOIN roles r ON u.role_id = r.id;`
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
@@ -84,17 +85,17 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models
 	// ================= DB =================
 	query := `
 		SELECT 
-			id, 
-			COALESCE(picture, '') AS picture, 
-			full_name, 
-			email, 
-			password, 
-			address, 
-			phone, 
-			role_id,
-			created_at,
-			updated_at
-		FROM users 
+     		u.id, 
+     		u.full_name, 
+     		COALESCE(u.picture, '') AS picture, 
+     		u.email,
+     		u.password,
+     		r.name as role, 
+     		u.phone, 
+     		u.address, 
+     		u.created_at, 
+     		u.updated_at FROM users u
+        JOIN roles r ON u.role_id = r.id
 		WHERE id=$1
 	`
 
@@ -132,7 +133,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, u models.User) error {
 		u.Password,
 		u.Address,
 		u.Phone,
-		u.RoleId,
+		u.Role,
 		u.CreatedAt)
 
 	return err
@@ -160,7 +161,7 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, u models.
 		u.Password,
 		u.Address,
 		u.Phone,
-		u.RoleId,
+		u.Role,
 		time.Now(),
 		id)
 	if err != nil {
@@ -195,17 +196,17 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 	}
 	query := `
 		SELECT 
-			id,
-			full_name,
-			COALESCE(picture, '') AS picture, 
-			email,
-			password,
-			role_id,
-			phone,
-			address,
-			created_at,
-			updated_at
-		FROM users
+     		u.id, 
+     		u.full_name, 
+     		COALESCE(u.picture, '') AS picture, 
+     		u.email,
+     		u.password,
+     		r.name as role, 
+     		u.phone, 
+     		u.address, 
+     		u.created_at, 
+     		u.updated_at FROM users u
+        JOIN roles r ON u.role_id = r.id
 		WHERE email=$1
 	`
 	row, err := r.db.Query(ctx, query, email)
