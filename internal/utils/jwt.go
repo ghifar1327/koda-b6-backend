@@ -10,8 +10,8 @@ import (
 )
 
 type ClaimCustomJwt struct {
-	Id     uuid.UUID `json:"id"`
-	RoleId int       `json:"role_id"`
+	Id   uuid.UUID `json:"id"`
+	Role string    `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -24,7 +24,7 @@ func GenerateToken(user *models.User) (string, error) {
 	// generate claim, claims = payload
 	claims := ClaimCustomJwt{
 		Id:     user.Id,
-		RoleId: user.RoleId,
+		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
