@@ -23,14 +23,46 @@ REST API backend for a coffee shop application, built with Go, Gin, PostgreSQL, 
 ## Project Structure
 
 ```text
-cmd/                   application entrypoint
-internal/handlers/     HTTP handler layer
-internal/service/      business logic
-internal/repository/   database and Redis access
-internal/routes/       API routing
-db/migrations/         SQL schema/migrations
-docs/                  generated Swagger docs
+.
+├── cmd
+│   └── main.go
+├── db
+│   └── migrations
+├── docs
+│   ├── docs.go
+│   ├── swagger.json
+│   └── swagger.yaml
+├── internal
+│   ├── di
+│   ├── dto
+│   ├── handlers
+│   ├── middleware
+│   ├── models
+│   ├── repository
+│   ├── routes
+│   ├── service
+│   └── utils
+├── uploads
+├── dockerfile
+├── go.mod
+├── go.sum
+└── README.md
 ```
+
+- `cmd/`: aplikasi entrypoint.
+- `db/migrations/`: file SQL migration untuk membuat dan mengubah skema database.
+- `docs/`: dokumentasi Swagger yang dihasilkan.
+- `internal/di/`: dependency injection dan setup container.
+- `internal/dto/`: objek transfer data untuk request/response.
+- `internal/handlers/`: HTTP handler endpoint.
+- `internal/middleware/`: middleware seperti auth dan CORS.
+- `internal/models/`: definisi model data dan struktur database.
+- `internal/repository/`: akses database dan Redis.
+- `internal/routes/`: definisi rute API.
+- `internal/service/`: logika bisnis.
+- `internal/utils/`: utilitas pendukung (JWT, hashing, OTP, dll.).
+- `uploads/`: penyimpanan file upload gambar.
+- `dockerfile`: konfigurasi build Docker.
 
 ## Environment Variables
 
@@ -84,7 +116,7 @@ Create a PostgreSQL database, then make sure `DATABASE_URL` points to that datab
 
 ### 3. Run migrations
 
-This project stores SQL schema files in [db/migrations](/home/ghifar/koda-b6/backend-coffee-shop/db/migrations). Run the `.up.sql` files in this order:
+This project stores SQL schema files in `db/migrations`. Run the `.up.sql` files in this order:
 
 1. `000001_init_db.up.sql`
 2. `000002_forgot_pwd.up.sql`
@@ -140,8 +172,8 @@ http://localhost:8888/swagger/index.html
 
 Generated Swagger files:
 
-- [docs/swagger.yaml](/home/ghifar/koda-b6/backend-coffee-shop/docs/swagger.yaml)
-- [docs/swagger.json](/home/ghifar/koda-b6/backend-coffee-shop/docs/swagger.json)
+- `docs/swagger.yaml`
+- `docs/swagger.json`
 
 ## Endpoint Overview
 
@@ -197,4 +229,4 @@ Admin endpoints:
 
 - JWT uses `SECRET_KEY` and the current token lifetime is 15 minutes.
 - CORS reads `CORS_ORIGINS` in JSON array format, not as a plain string.
-- Picture upload is limited to 1 MB.
+- Uploaded images are served from `/uploads`.
